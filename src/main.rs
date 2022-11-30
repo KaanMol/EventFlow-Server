@@ -17,8 +17,7 @@ async fn main() {
     let mut calendars: Vec<Calendar> = Vec::new();
     let calendar_urls = vec![
                
-
-    ];image.png
+    ];
 
     for calendar in calendar_urls {
         let calendar: Result<Calendar, Errors> = get_calendar(String::from(calendar))
