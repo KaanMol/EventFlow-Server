@@ -1,4 +1,4 @@
-use icalendar::{Calendar};
+use icalendar::{Calendar, Component, DatePerhapsTime};
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum Errors {
@@ -9,15 +9,36 @@ pub enum Errors {
     InvalidLinkError(String),
 }
 
-#[tokio::main]
+#[derive(Debug)]
+struct CalendarEvent {
+    pub name: String,
+    pub start_date: DatePerhapsTime,
+    pub end_date: DatePerhapsTime,
+    pub description: String,
+}
 
+
+impl CalendarEvent {
+    pub fn new(name: String, start_date: DatePerhapsTime, end_date: DatePerhapsTime, description: String) -> Self {
+        CalendarEvent {
+            name,
+            start_date,
+            end_date,
+            description,
+        }
+    }
+}
+
+#[tokio::main]
 async fn main() {
     println!("running");
 
     let mut calendars: Vec<Calendar> = Vec::new();
     let calendar_urls = vec![
-               
+        
     ];
+
+    println!("getting calendars");
 
     for calendar in calendar_urls {
         let calendar: Result<Calendar, Errors> = get_calendar(String::from(calendar))
@@ -28,8 +49,30 @@ async fn main() {
             Err(e) => println!("Error: {:?}", e.to_string()),
         }
     }
+    
+    for calendar in calendars.iter() {
+        let mut eventsVector: Vec<CalendarEvent> = Vec::new();
 
-    println!("calendars: {:?}", calendars);
+        for events in calendar.components.iter() {
+            if let None = events.as_event() {
+                continue;
+            }
+
+            let title = events.as_event().unwrap().get_summary().unwrap();
+            let start_date = events.as_event().unwrap().get_start().unwrap();
+            let end_date = events.as_event().unwrap().get_end().unwrap();
+            let description = {
+                if let Some(description) = events.as_event().unwrap().get_description() {
+                    description
+                } else {
+                    ""
+                }
+            };
+            eventsVector.push(CalendarEvent::new(title.to_string(), start_date, end_date, description.to_string()));
+        }
+
+        println!("events: {:?}", eventsVector);
+    }
 }
 
 async fn get_calendar(ical: String) -> Result<Calendar, Errors> {
