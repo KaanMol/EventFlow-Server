@@ -1,4 +1,5 @@
-use icalendar::{Calendar, Component, DatePerhapsTime};
+use actix_web::{HttpServer, get, web::{self, Data}, Responder, App};
+use icalendar::{Calendar, Component, DatePerhapsTime, EventLike};
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum Errors {
@@ -75,12 +76,13 @@ impl CalendarEvent {
     }
 }
 
-#[tokio::main]
-async fn main() {
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
     println!("running");
 
     let mut calendars: Vec<Calendar> = Vec::new();
-    let calendar_urls = vec![];
+    let calendar_urls = vec![
+    ];
 
     println!("getting calendars");
 
@@ -174,8 +176,27 @@ async fn main() {
     //     event.name == "Servicemedewerker" || event.name == "Niet"
     // }).collect::<Vec<CalendarEvent>>();
 
-    println!("work events: {:?}", filtered_events);
+    // println!("work events: {:?}", filtered_events);
+    let actix_data = Data::new(filtered_events);
+    let app = move || App::new()
+            .app_data(Data::clone(&actix_data))
+            .service(calendar_route);
 
+    HttpServer::new(app)
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+
+}
+
+#[get("/hello/{name}")]
+async fn greet(name: web::Path<String>) -> impl Responder {
+    format!("Hello {name}!")
+}
+
+#[get("/calendar")]
+async fn calendar_route(calendar: web::Data<Vec<CalendarEvent>>) -> impl Responder {
+    calendar_to_ical(&calendar)
 }
 
 fn do_operation(field: &String, operation: &EventOperation) -> String {
@@ -227,4 +248,19 @@ async fn get_ical_by_url(url: String) -> Result<String, Box<dyn std::error::Erro
         .await?;
     
     Ok(body)
+}
+
+fn calendar_to_ical(events: &Vec<CalendarEvent>) -> String {
+    let mut calendar = Calendar::new();
+
+    for event in events.iter() {
+        let mut calendar_event = icalendar::Event::new();
+        calendar_event.summary(&event.name);
+        calendar_event.description(&event.description);
+        calendar_event.starts(event.start_date.clone());
+        calendar_event.ends(event.end_date.clone());
+        calendar.push(calendar_event);
+    }
+
+    calendar.to_string()
 }
