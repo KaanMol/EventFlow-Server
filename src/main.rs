@@ -1,5 +1,9 @@
+mod database;
+
 use actix_web::{HttpServer, get, web::{self, Data}, Responder, App};
+use database::Database;
 use icalendar::{Calendar, Component, DatePerhapsTime, EventLike};
+use rusqlite::{Connection, Result, NO_PARAMS};
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum Errors {
@@ -76,8 +80,31 @@ impl CalendarEvent {
     }
 }
 
+struct Calendar2 {
+    ical_urls: Vec<String>,
+    events: Vec<CalendarEvent>,
+}
+
+impl Calendar2 {
+    pub fn new() -> Self {
+        Self {
+            events: Vec::new(),
+            ical_urls: Vec::new(),
+        }
+    }
+
+    pub fn add_ical_url(&mut self, database: database::Database, url: &str) {
+        self.ical_urls.push(url.to_string());
+        // database.
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+
+    let database = database::Database::connect();
+
     println!("running");
 
     let mut calendars: Vec<Calendar> = Vec::new();
@@ -170,17 +197,17 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::init();
 
-    // let work_events= eventsVector.into_iter().filter(|event| {
-        
-    //     event.name == "Servicemedewerker" || event.name == "Niet"
-    // }).collect::<Vec<CalendarEvent>>();
-
-    // println!("work events: {:?}", filtered_events);
     let actix_data = Data::new(filtered_events);
     let app = move || App::new()
+            .service(create_user)
             .app_data(Data::clone(&actix_data))
-            .service(calendar_route);
+            .service(calendar_route)
+            .service(get_icals)
+            .service(set_ical);
+            
 
     HttpServer::new(app)
     .bind(("127.0.0.1", 8080))?
@@ -194,10 +221,42 @@ async fn greet(name: web::Path<String>) -> impl Responder {
     format!("Hello {name}!")
 }
 
+#[get("/geticals/{user_id}")]
+async fn get_icals(user_id: web::Path<String>) -> impl Responder {
+    let db = database::Database::connect();
+    let icals = db.get_ical_urls(user_id.to_string()).unwrap();
+
+    println!("icals: {} {:?}", icals.len(), icals);
+
+    icals.join("\n")
+}
+
+
+#[get("/seticals/{user_id}/{name}/{ical_url}")] //I am aware this is not restful, I will fix this later TODO
+async fn set_ical(path: web::Path<(String,String,String)>) -> impl Responder {
+    let user_id = path.0.to_string();
+    let name = path.1.to_string();
+    let ical_url = path.2.to_string();
+
+    let db = database::Database::connect();
+    db.add_ical(name, ical_url, user_id).unwrap();
+
+    "ok"
+}
+
 #[get("/calendar")]
 async fn calendar_route(calendar: web::Data<Vec<CalendarEvent>>) -> impl Responder {
     calendar_to_ical(&calendar)
 }
+
+#[get("/user/{name}")]
+async fn create_user(name: web::Path<String>) -> impl Responder {
+    println!("name: {:?}", name);
+    let db = database::Database::connect();
+
+    db.create_user(name.to_string()).unwrap()
+}
+
 
 fn do_operation(field: &String, operation: &EventOperation) -> String {
     let field = field.clone();
