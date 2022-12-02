@@ -133,22 +133,20 @@ impl Calendar {
         for event in self.events.iter() {
             let mut calendar_event = icalendar::Event::new();
 
+            let start_date = DatePerhapsTime::DateTime(icalendar::CalendarDateTime::WithTimezone {
+                date_time: event.start_date.date.naive_utc(),
+                tzid: event.start_date.timezone.to_string(),
+            });
+
+            let end_date = DatePerhapsTime::DateTime(icalendar::CalendarDateTime::WithTimezone {
+                date_time: event.end_date.date.naive_utc(),
+                tzid: event.end_date.timezone.to_string(),
+            });
+
             calendar_event.summary(&event.name);
             calendar_event.description(&event.description);
-            calendar_event.starts(
-                event
-                    .start_date
-                    .date
-                    .with_timezone(&chrono::Utc) 
-                    //.naive_utc(), // TODO: Does this really work?
-            );
-            calendar_event.ends(
-                event
-                    .end_date
-                    .date
-                    .with_timezone(&event.end_date.timezone)
-                    .naive_utc(), // TODO: Does this really work?
-            );
+            calendar_event.starts(start_date);
+            calendar_event.ends(end_date);
             calendar.push(calendar_event);
         }
 
