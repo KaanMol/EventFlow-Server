@@ -1,5 +1,10 @@
 use rusqlite::Connection;
 
+struct User {
+    id: String,
+    name: String,
+}
+
 pub struct Database {
     conn: Connection,
 }
@@ -7,10 +12,10 @@ pub struct Database {
 impl Database {
     pub fn connect() -> Self {
         let connection = Self {
-            conn: Connection::open("calendar.db").unwrap()
+            conn: Connection::open("calendar.db").unwrap(),
         };
 
-        connection.setup();
+        connection.setup().unwrap();
         connection
     }
 
@@ -73,34 +78,35 @@ impl Database {
 
         println!("uuid: {:?}. name: {:?}", uuid, name);
 
-        let mut statement = self.conn.prepare("insert into user (id, name) values (?1, ?2)")?;
-        let mut rows = statement.query([uuid.clone(), name])?;
-
-        let mut user_id: String = String::from("None"); 
-
-        while let Some(row) = rows.next()? {
-            println!("Found row {:?}", row.get::<usize, String>(0)?);
-            user_id = row.get(0)?;
-        }
+        let mut statement = self
+            .conn
+            .prepare("insert into user (id, name) values (?1, ?2)")?;
+        statement.execute([uuid.clone(), name])?;
 
         Ok(uuid)
     }
 
-    pub fn add_ical(&self, name: String, url: String, user_id: String) -> Result<(), rusqlite::Error> {
-        let mut statement = self.conn.prepare("insert into ical (name, url, user_id) values (?1, ?2, ?3)")?;
+    pub fn add_ical(
+        &self,
+        name: String,
+        url: String,
+        user_id: String,
+    ) -> Result<(), rusqlite::Error> {
+        let mut statement = self
+            .conn
+            .prepare("insert into ical (name, url, user_id) values (?1, ?2, ?3)")?;
         statement.execute([name, url, user_id])?;
 
         Ok(())
     }
 
     pub fn get_ical_urls(&self, user_id: String) -> Result<Vec<String>, rusqlite::Error> {
-        let mut statement = self.conn.prepare("SELECT url FROM ical WHERE user_id = ?1")?;
+        let mut statement = self
+            .conn
+            .prepare("SELECT url FROM ical WHERE user_id = ?1")?;
 
         let ical_urls = statement.query_map([user_id], |row| row.get::<usize, String>(0))?;
 
-        
-        Ok(ical_urls.map(|url| {
-            url.unwrap()
-        }).collect::<Vec<String>>())
+        Ok(ical_urls.map(|url| url.unwrap()).collect::<Vec<String>>())
     }
 }
