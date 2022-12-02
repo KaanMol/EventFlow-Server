@@ -3,7 +3,7 @@ use regex::Regex;
 
 #[derive(Debug, Clone)]
 pub struct DateTime {
-    pub date: chrono::DateTime<chrono::Utc>,
+    pub date: chrono::NaiveDateTime,
     pub timezone: chrono_tz::Tz,
 }
 
@@ -134,12 +134,12 @@ impl Calendar {
             let mut calendar_event = icalendar::Event::new();
 
             let start_date = DatePerhapsTime::DateTime(icalendar::CalendarDateTime::WithTimezone {
-                date_time: event.start_date.date.naive_utc(),
+                date_time: event.start_date.date,
                 tzid: event.start_date.timezone.to_string(),
             });
 
             let end_date = DatePerhapsTime::DateTime(icalendar::CalendarDateTime::WithTimezone {
-                date_time: event.end_date.date.naive_utc(),
+                date_time: event.end_date.date,
                 tzid: event.end_date.timezone.to_string(),
             });
 

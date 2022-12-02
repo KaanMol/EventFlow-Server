@@ -1,4 +1,3 @@
-use derivative::Derivative;
 use rusqlite::Connection;
 
 struct User {
@@ -6,11 +5,11 @@ struct User {
     name: String,
 }
 
-struct Ical {
-    id: Option<i32>,
-    user_id: String,
-    name: String,
-    url: String,
+pub struct Ical {
+    pub id: Option<i32>,
+    pub user_id: String,
+    pub name: String,
+    pub url: String,
 }
 
 pub struct Database {

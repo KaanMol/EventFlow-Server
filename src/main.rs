@@ -1,6 +1,6 @@
 mod calendar;
 mod database;
-mod tests;
+// mod tests;
 
 use actix_web::{
     cookie::time::format_description::parse,
@@ -131,9 +131,14 @@ async fn get_icals(user_id: web::Path<String>) -> impl Responder {
     let db = database::Database::connect();
     let icals = db.get_ical_urls(user_id.to_string()).unwrap();
 
-    println!("icals: {} {:?}", icals.len(), icals);
+    let ical_urls = icals
+        .iter()
+        .map(|ical| ical.url.clone())
+        .collect::<Vec<String>>();
 
-    icals.join("\n")
+    println!("icals: {} {:?}", icals.len(), ical_urls);
+
+    ical_urls.join("\n")
 }
 
 #[derive(Deserialize)]
@@ -147,7 +152,12 @@ async fn set_ical(user_id: web::Path<String>, ical: web::Json<Ical>) -> impl Res
     let db = database::Database::connect();
 
     //TODO: Fix the clones in the future
-    match db.add_ical(ical.name.clone(), ical.url.clone(), user_id.to_string()) {
+    match db.add_ical(database::Ical {
+        id: None,
+        user_id: user_id.to_string(),
+        name: ical.name.clone(),
+        url: ical.url.clone(),
+    }) {
         Ok(_) => "ok".to_string(),
         Err(e) => e.to_string(), // todo: make this return error code 50X
     }
@@ -195,17 +205,21 @@ fn dateperhapstime_to_datetime(date: DatePerhapsTime) -> calendar::DateTime {
         icalendar::DatePerhapsTime::Date(date) => {
             let date =
                 chrono::NaiveDateTime::new(date, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
-            chrono::Utc.from_local_datetime(&date).unwrap()
+            // chrono::Utc.from_local_datetime(&date).unwrap()
+            date
         }
         icalendar::DatePerhapsTime::DateTime(date) => match date {
             icalendar::CalendarDateTime::Floating(date) => {
-                chrono::Utc.from_local_datetime(&date).unwrap()
+                // chrono::Utc.from_local_datetime(&date).unwrap()
+                date
             }
-            icalendar::CalendarDateTime::Utc(date) => date,
+            icalendar::CalendarDateTime::Utc(date) => date.naive_utc(),
             icalendar::CalendarDateTime::WithTimezone { date_time, tzid } => {
                 timezone = tzid.parse().unwrap();
-                let local_date_time = timezone.from_local_datetime(&date_time).unwrap();
-                local_date_time.with_timezone(&chrono::Utc)
+                date_time
+                // timezone = tzid.parse().unwrap();
+                // let local_date_time = timezone.from_local_datetime(&date_time).unwrap();
+                // local_date_time.with_timezone(&chrono::Utc)
             }
         },
     };
