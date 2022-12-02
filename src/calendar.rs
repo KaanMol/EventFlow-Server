@@ -1,4 +1,5 @@
 use icalendar::{Component, DatePerhapsTime, EventLike};
+use regex::Regex;
 
 #[derive(Debug, Clone)]
 pub struct CalendarEvent {
@@ -13,6 +14,7 @@ pub enum Filter {
     IsNot,
     Contains,
     DoesNotContain,
+    RegularExpression
 }
 
 pub enum Field {
@@ -70,6 +72,10 @@ impl Calendar {
                         Filter::IsNot => value != comparison.value,
                         Filter::Contains => value.contains(&comparison.value),
                         Filter::DoesNotContain => !value.contains(&comparison.value),
+                        Filter::RegularExpression => match Regex::new(&comparison.value) {
+                            Ok(e) => e.is_match(&value),
+                            Err(_) => false
+                        }
                     }
                 })
                 .collect::<Vec<CalendarEvent>>();
@@ -143,6 +149,16 @@ fn do_operation(field: &String, operation: &EventOperation) -> String {
         }
         Filter::DoesNotContain => {
             if !field.contains(&operation.value) {
+                operation.new_value.clone()
+            } else {
+                field
+            }
+        }
+        Filter::RegularExpression => {
+            if match Regex::new(&operation.value) {
+                Ok(e) => e.is_match(&field),
+                Err(_) => false
+            } {
                 operation.new_value.clone()
             } else {
                 field
