@@ -2,7 +2,7 @@ mod calendar;
 mod database;
 
 use actix_web::{
-    get,
+    get, put, post,
     web::{self, Data},
     App, HttpServer, Responder,
 };
@@ -133,16 +133,20 @@ async fn get_icals(user_id: web::Path<String>) -> impl Responder {
     icals.join("\n")
 }
 
-#[get("/seticals/{user_id}/{name}/{ical_url}")] //I am aware this is not restful, I will fix this later TODO
-async fn set_ical(path: web::Path<(String, String, String)>) -> impl Responder {
+
+#[put("/seticals/{user_id}/{name}/{ical_url}")]
+async fn set_ical(path: web::Path<(String,String,String)>) -> impl Responder {
     let user_id = path.0.to_string();
     let name = path.1.to_string();
     let ical_url = path.2.to_string();
 
     let db = database::Database::connect();
-    db.add_ical(name, ical_url, user_id).unwrap();
-
-    "ok"
+    
+    match db.add_ical(name, ical_url, user_id)
+    {
+        Ok(_) => "ok".to_string(),
+        Err(e) => e.to_string() // todo: make this return error code 50X
+    }
 }
 
 #[get("/calendar")]
@@ -150,12 +154,15 @@ async fn calendar_route(calendar: web::Data<calendar::Calendar>) -> impl Respond
     calendar.to_ical()
 }
 
-#[get("/user/{name}")]
+#[post("/user/{name}")]
 async fn create_user(name: web::Path<String>) -> impl Responder {
-    println!("name: {:?}", name);
+    println!("Registering user {:?}", name.as_str());
     let db = database::Database::connect();
 
-    db.create_user(name.to_string()).unwrap()
+    match db.create_user(name.to_string()) {
+        Ok(e) => e,
+        Err(e) => e.to_string() // todo: make this return error code 50X
+    }
 }
 
 async fn get_calendar(ical: String) -> Result<Calendar, Errors> {
