@@ -239,6 +239,12 @@ async fn set_ical(path: web::Path<(String,String,String)>) -> impl Responder {
     let ical_url = path.2.to_string();
 
     let db = database::Database::connect();
+    
+    match db.add_ical(name, ical_url, user_id)
+    {
+        Ok(_) => "ok".to_string(),
+        Err(e) => e.to_string() // todo: make this return error code 50X
+    }
 }
 
 #[get("/calendar")]
@@ -251,6 +257,10 @@ async fn create_user(name: web::Path<String>) -> impl Responder {
     println!("Registering user {:?}", name.as_str());
     let db = database::Database::connect();
 
+    match db.create_user(name.to_string()) {
+        Ok(e) => e,
+        Err(e) => e.to_string() // todo: make this return error code 50X
+    }
 }
 
 
