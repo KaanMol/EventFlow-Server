@@ -307,6 +307,10 @@ dependencies = [
  "actix-web",
  "chrono",
  "chrono-tz",
+<<<<<<< Updated upstream
+=======
+ "derivative",
+>>>>>>> Stashed changes
  "env_logger",
  "futures",
  "icalendar",
@@ -491,6 +495,17 @@ name = "cxxbridge-macro"
 version = "1.0.82"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a08a6e2fcc370a089ad3b4aaf54db3b1b4cee38ddabce5896b33eb693275f470"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "derivative"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcc3dd5e9e9c0b295d6e1e4d811fb6f157d5ffd784b8d202fc62eac8035a770b"
 dependencies = [
  "proc-macro2",
  "quote",

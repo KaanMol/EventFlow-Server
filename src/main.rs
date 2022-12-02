@@ -2,8 +2,6 @@ mod calendar;
 mod database;
 mod tests;
 
-use std::fmt::format;
-
 use actix_web::{
     cookie::time::format_description::parse,
     get, post, put,
@@ -128,12 +126,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(app).bind(("127.0.0.1", 8080))?.run().await
 }
 
-#[get("/hello/{name}")]
-async fn greet(name: web::Path<String>) -> impl Responder {
-    format!("Hello {name}!")
-}
-
-#[get("/geticals/{user_id}")]
+#[get("/ical/{user_id}")]
 async fn get_icals(user_id: web::Path<String>) -> impl Responder {
     let db = database::Database::connect();
     let icals = db.get_ical_urls(user_id.to_string()).unwrap();

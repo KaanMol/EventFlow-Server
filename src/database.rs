@@ -1,8 +1,16 @@
+use derivative::Derivative;
 use rusqlite::Connection;
 
 struct User {
     id: String,
     name: String,
+}
+
+struct Ical {
+    id: Option<i32>,
+    user_id: String,
+    name: String,
+    url: String,
 }
 
 pub struct Database {
@@ -86,27 +94,35 @@ impl Database {
         Ok(uuid)
     }
 
-    pub fn add_ical(
-        &self,
-        name: String,
-        url: String,
-        user_id: String,
-    ) -> Result<(), rusqlite::Error> {
+    pub fn add_ical(&self, ical: Ical) -> Result<(), rusqlite::Error> {
         let mut statement = self
             .conn
             .prepare("insert into ical (name, url, user_id) values (?1, ?2, ?3)")?;
-        statement.execute([name, url, user_id])?;
+        statement.execute([ical.name, ical.url, ical.user_id])?;
 
         Ok(())
     }
 
-    pub fn get_ical_urls(&self, user_id: String) -> Result<Vec<String>, rusqlite::Error> {
+    pub fn get_ical_urls(&self, user_id: String) -> Result<Vec<Ical>, rusqlite::Error> {
         let mut statement = self
             .conn
-            .prepare("SELECT url FROM ical WHERE user_id = ?1")?;
+            .prepare("SELECT id, name, url, user_id FROM ical WHERE user_id = ?1")?;
 
-        let ical_urls = statement.query_map([user_id], |row| row.get::<usize, String>(0))?;
+        let ical_urls = statement.query_map([user_id], |row| {
+            Ok(Ical {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                url: row.get(2)?,
+                user_id: row.get(3)?,
+            })
+        })?;
 
-        Ok(ical_urls.map(|url| url.unwrap()).collect::<Vec<String>>())
+        let mut ical_objects: Vec<Ical> = Vec::new();
+        for ical_url in ical_urls {
+            ical_objects.push(ical_url.unwrap());
+        }
+
+        Ok(ical_objects)
+        // Ok(ical_urls.map(|url| url.unwrap()).collect::<Vec<String>>())
     }
 }
