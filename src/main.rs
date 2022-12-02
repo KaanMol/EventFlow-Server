@@ -1,6 +1,6 @@
 mod database;
 
-use actix_web::{HttpServer, get, web::{self, Data}, Responder, App};
+use actix_web::{HttpServer, get, put, post, web::{self, Data}, Responder, App};
 use database::Database;
 use icalendar::{Calendar, Component, DatePerhapsTime, EventLike};
 use rusqlite::{Connection, Result, NO_PARAMS};
@@ -232,16 +232,13 @@ async fn get_icals(user_id: web::Path<String>) -> impl Responder {
 }
 
 
-#[get("/seticals/{user_id}/{name}/{ical_url}")] //I am aware this is not restful, I will fix this later TODO
+#[put("/seticals/{user_id}/{name}/{ical_url}")]
 async fn set_ical(path: web::Path<(String,String,String)>) -> impl Responder {
     let user_id = path.0.to_string();
     let name = path.1.to_string();
     let ical_url = path.2.to_string();
 
     let db = database::Database::connect();
-    db.add_ical(name, ical_url, user_id).unwrap();
-
-    "ok"
 }
 
 #[get("/calendar")]
@@ -249,12 +246,11 @@ async fn calendar_route(calendar: web::Data<Vec<CalendarEvent>>) -> impl Respond
     calendar_to_ical(&calendar)
 }
 
-#[get("/user/{name}")]
+#[post("/user/{name}")]
 async fn create_user(name: web::Path<String>) -> impl Responder {
-    println!("name: {:?}", name);
+    println!("Registering user {:?}", name.as_str());
     let db = database::Database::connect();
 
-    db.create_user(name.to_string()).unwrap()
 }
 
 
