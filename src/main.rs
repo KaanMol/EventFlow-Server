@@ -1,14 +1,17 @@
 mod calendar;
 mod database;
+mod tests;
 
 use std::fmt::format;
 
 use actix_web::{
+    cookie::time::format_description::parse,
     get, post, put,
     web::{self, Data},
     App, HttpServer, Responder,
 };
-use icalendar::{Calendar, Component};
+use chrono::TimeZone;
+use icalendar::{Calendar, Component, DatePerhapsTime};
 use rusqlite::Result;
 use serde::Deserialize;
 
@@ -29,7 +32,7 @@ async fn main() -> std::io::Result<()> {
     println!("running");
 
     let mut calendars: Vec<Calendar> = Vec::new();
-    let calendar_urls = vec![
+    let calendar_urls = vec!["https://rooster.universiteitleiden.nl/ical?63879a34&eu=czM1MjYyMDg=&h=51dOpLAHe66E7JZLBpxfnKSLWj3m-acHtjbF8CO9x48="];
 
     println!("getting calendars");
 
@@ -51,7 +54,12 @@ async fn main() -> std::io::Result<()> {
             // TODO: Fix this mess
             let title = events.as_event().unwrap().get_summary().unwrap();
             let start_date = events.as_event().unwrap().get_start().unwrap();
+            let start_date = dateperhapstime_to_datetime(start_date);
+
             let end_date = events.as_event().unwrap().get_end().unwrap();
+            let end_date = dateperhapstime_to_datetime(end_date);
+
+            println!("date: {:?}", start_date);
 
             let description = {
                 if let Some(description) = events.as_event().unwrap().get_description() {
@@ -103,7 +111,7 @@ async fn main() -> std::io::Result<()> {
         },
     ];
 
-    let filtered_calendar = calendar2.filter(comparisons).operations(operations);
+    let filtered_calendar = calendar2.filter(comparisons); // .operations(operations);
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
@@ -183,4 +191,31 @@ async fn get_ical_by_url(url: String) -> Result<String, Box<dyn std::error::Erro
     let body = client.get(&url).send().await?.text().await?;
 
     Ok(body)
+}
+
+fn dateperhapstime_to_datetime(date: DatePerhapsTime) -> calendar::DateTime {
+    // TODO: unwraps ...
+
+    let mut timezone = chrono_tz::UTC;
+
+    let date = match date {
+        icalendar::DatePerhapsTime::Date(date) => {
+            let date =
+                chrono::NaiveDateTime::new(date, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
+            chrono::Utc.from_local_datetime(&date).unwrap()
+        }
+        icalendar::DatePerhapsTime::DateTime(date) => match date {
+            icalendar::CalendarDateTime::Floating(date) => {
+                chrono::Utc.from_local_datetime(&date).unwrap()
+            }
+            icalendar::CalendarDateTime::Utc(date) => date,
+            icalendar::CalendarDateTime::WithTimezone { date_time, tzid } => {
+                timezone = tzid.parse().unwrap();
+                let local_date_time = timezone.from_local_datetime(&date_time).unwrap();
+                local_date_time.with_timezone(&chrono::Utc)
+            }
+        },
+    };
+
+    calendar::DateTime { date, timezone }
 }

@@ -2,11 +2,33 @@ use icalendar::{Component, DatePerhapsTime, EventLike};
 use regex::Regex;
 
 #[derive(Debug, Clone)]
+pub struct DateTime {
+    pub date: chrono::DateTime<chrono::Utc>,
+    pub timezone: chrono_tz::Tz,
+}
+
+#[derive(Debug, Clone)]
 pub struct CalendarEvent {
     pub name: String,
-    pub start_date: DatePerhapsTime,
-    pub end_date: DatePerhapsTime,
+    pub start_date: DateTime,
+    pub end_date: DateTime,
     pub description: String,
+}
+
+impl CalendarEvent {
+    pub fn new(
+        name: String,
+        start_date: DateTime,
+        end_date: DateTime,
+        description: String,
+    ) -> Self {
+        Self {
+            name,
+            start_date,
+            end_date,
+            description,
+        }
+    }
 }
 
 pub enum Filter {
@@ -14,7 +36,7 @@ pub enum Filter {
     IsNot,
     Contains,
     DoesNotContain,
-    RegularExpression
+    RegularExpression,
 }
 
 pub enum Field {
@@ -74,8 +96,8 @@ impl Calendar {
                         Filter::DoesNotContain => !value.contains(&comparison.value),
                         Filter::RegularExpression => match Regex::new(&comparison.value) {
                             Ok(e) => e.is_match(&value),
-                            Err(_) => false
-                        }
+                            Err(_) => false,
+                        },
                     }
                 })
                 .collect::<Vec<CalendarEvent>>();
@@ -113,8 +135,20 @@ impl Calendar {
 
             calendar_event.summary(&event.name);
             calendar_event.description(&event.description);
-            calendar_event.starts(event.start_date.clone());
-            calendar_event.ends(event.end_date.clone());
+            calendar_event.starts(
+                event
+                    .start_date
+                    .date
+                    .with_timezone(&chrono::Utc) 
+                    //.naive_utc(), // TODO: Does this really work?
+            );
+            calendar_event.ends(
+                event
+                    .end_date
+                    .date
+                    .with_timezone(&event.end_date.timezone)
+                    .naive_utc(), // TODO: Does this really work?
+            );
             calendar.push(calendar_event);
         }
 
@@ -157,7 +191,7 @@ fn do_operation(field: &String, operation: &EventOperation) -> String {
         Filter::RegularExpression => {
             if match Regex::new(&operation.value) {
                 Ok(e) => e.is_match(&field),
-                Err(_) => false
+                Err(_) => false,
             } {
                 operation.new_value.clone()
             } else {
