@@ -1,13 +1,16 @@
 mod calendar;
 mod database;
 
+use std::fmt::format;
+
 use actix_web::{
-    get, put, post,
+    get, post, put,
     web::{self, Data},
     App, HttpServer, Responder,
 };
 use icalendar::{Calendar, Component};
 use rusqlite::Result;
+use serde::Deserialize;
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum Errors {
@@ -27,7 +30,6 @@ async fn main() -> std::io::Result<()> {
 
     let mut calendars: Vec<Calendar> = Vec::new();
     let calendar_urls = vec![
-    ];
 
     println!("getting calendars");
 
@@ -133,19 +135,20 @@ async fn get_icals(user_id: web::Path<String>) -> impl Responder {
     icals.join("\n")
 }
 
+#[derive(Deserialize)]
+struct Ical {
+    name: String,
+    url: String,
+}
 
-#[put("/seticals/{user_id}/{name}/{ical_url}")]
-async fn set_ical(path: web::Path<(String,String,String)>) -> impl Responder {
-    let user_id = path.0.to_string();
-    let name = path.1.to_string();
-    let ical_url = path.2.to_string();
-
+#[post("/ical/{user_id}")]
+async fn set_ical(user_id: web::Path<String>, ical: web::Json<Ical>) -> impl Responder {
     let db = database::Database::connect();
-    
-    match db.add_ical(name, ical_url, user_id)
-    {
+
+    //TODO: Fix the clones in the future
+    match db.add_ical(ical.name.clone(), ical.url.clone(), user_id.to_string()) {
         Ok(_) => "ok".to_string(),
-        Err(e) => e.to_string() // todo: make this return error code 50X
+        Err(e) => e.to_string(), // todo: make this return error code 50X
     }
 }
 
@@ -161,7 +164,7 @@ async fn create_user(name: web::Path<String>) -> impl Responder {
 
     match db.create_user(name.to_string()) {
         Ok(e) => e,
-        Err(e) => e.to_string() // todo: make this return error code 50X
+        Err(e) => e.to_string(), // todo: make this return error code 50X
     }
 }
 

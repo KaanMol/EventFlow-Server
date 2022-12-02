@@ -14,3 +14,6 @@ actix-web = "4"
 rusqlite = { version = "0.28.0", features = ["bundled"] }
 env_logger = "0.10.0"
 uuid = "1.2.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+futures = "0.3"
