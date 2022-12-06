@@ -1,16 +1,15 @@
 mod calendar;
 mod database;
 // mod tests;
+mod routes;
 
 use actix_web::{
-    cookie::time::format_description::parse,
     get, post, put,
     web::{self, Data},
     App, HttpServer, Responder,
 };
-use chrono::TimeZone;
 use icalendar::{Calendar, Component, DatePerhapsTime};
-use rusqlite::Result;
+// use rusqlite::Result;
 use serde::Deserialize;
 
 #[derive(thiserror::Error, Debug, Clone)]
@@ -21,9 +20,18 @@ pub enum Errors {
     #[error("Invalid iCal link: {0}")]
     InvalidLinkError(String),
 }
+#[derive(Debug, Clone)]
+pub struct AppState {
+    conn: sea_orm::DatabaseConnection,
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // let database = database::Database::connect().expect("Failed to connect to database");
+    // //let users = database
+
+    // return Ok("");
+
     // let database = database::Database::connect();
     let mut calendar2 = calendar::Calendar::new();
 
@@ -113,70 +121,20 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
+    let conn = sea_orm::Database::connect(String::from("sqlite://users.sqlite?mode=rwc"))
+        .await
+        .unwrap();
+
+    let state = AppState { conn };
+
     let actix_data = Data::new(filtered_calendar);
     let app = move || {
         App::new()
-            .service(create_user)
-            .app_data(Data::clone(&actix_data))
-            .service(calendar_route)
-            .service(get_icals)
-            .service(set_ical)
+            .app_data(Data::new(state.clone()))
+            .service(routes::create_user)
     };
 
     HttpServer::new(app).bind(("127.0.0.1", 8080))?.run().await
-}
-
-#[get("/ical/{user_id}")]
-async fn get_icals(user_id: web::Path<String>) -> impl Responder {
-    let db = database::Database::connect();
-    let icals = db.get_ical_urls(user_id.to_string()).unwrap();
-
-    let ical_urls = icals
-        .iter()
-        .map(|ical| ical.url.clone())
-        .collect::<Vec<String>>();
-
-    println!("icals: {} {:?}", icals.len(), ical_urls);
-
-    ical_urls.join("\n")
-}
-
-#[derive(Deserialize)]
-struct Ical {
-    name: String,
-    url: String,
-}
-
-#[post("/ical/{user_id}")]
-async fn set_ical(user_id: web::Path<String>, ical: web::Json<Ical>) -> impl Responder {
-    let db = database::Database::connect();
-
-    //TODO: Fix the clones in the future
-    match db.add_ical(database::Ical {
-        id: None,
-        user_id: user_id.to_string(),
-        name: ical.name.clone(),
-        url: ical.url.clone(),
-    }) {
-        Ok(_) => "ok".to_string(),
-        Err(e) => e.to_string(), // todo: make this return error code 50X
-    }
-}
-
-#[get("/calendar")]
-async fn calendar_route(calendar: web::Data<calendar::Calendar>) -> impl Responder {
-    calendar.to_ical()
-}
-
-#[post("/user/{name}")]
-async fn create_user(name: web::Path<String>) -> impl Responder {
-    println!("Registering user {:?}", name.as_str());
-    let db = database::Database::connect();
-
-    match db.create_user(name.to_string()) {
-        Ok(e) => e,
-        Err(e) => e.to_string(), // todo: make this return error code 50X
-    }
 }
 
 async fn get_calendar(ical: String) -> Result<Calendar, Errors> {

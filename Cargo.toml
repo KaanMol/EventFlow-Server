@@ -3,6 +3,9 @@ name = "calendar_server"
 version = "0.1.0"
 edition = "2021"
 
+
+[workspace]
+members = ["migration", "entity"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -12,7 +15,6 @@ tokio = { version = "1", features = ["full"] }
 thiserror = "1.0.37"
 actix-web = "4"
 env_logger = "0.10.0"
-uuid = { version = "1.2.2", features = ["serde", "v4"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 futures = "0.3"
@@ -21,5 +23,7 @@ chrono = { version = "0.4.23", features = ["serde"] }
 chrono-tz = "0.8.1" 
 actix-rt = "2.7.0"
 dotenv = "0.15.0"
-sea-orm = { version = "0.10", features = [ "sqlx-sqlite", "runtime-tokio-native-tls", "macros" ] }
+sea-orm = { version = "0.10", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros" ] }
 tracing = "0.1.37"
+entity = { path = "./entity" }
+uuid = { version = "1.2.2", features = ["serde", "v4"] }
