@@ -2,4 +2,5 @@
 
 pub mod prelude;
 
+pub mod ical;
 pub mod user;

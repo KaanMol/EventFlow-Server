@@ -21,6 +21,16 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Ical::Link).string().not_null())
+                    .col(ColumnDef::new(Ical::User).string().unique_key())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("user_ical")
+                            .from(Ical::Table, Ical::User)
+                            .to(
+                                crate::m20220101_000001_create_users::User::Table,
+                                crate::m20220101_000001_create_users::User::Id,
+                            ),
+                    )
                     .to_owned(),
             )
             .await
@@ -35,8 +45,9 @@ impl MigrationTrait for Migration {
 
 /// Learn more at https://docs.rs/sea-query#iden
 #[derive(Iden)]
-enum Ical {
+pub enum Ical {
     Table,
     Id,
     Link,
+    User,
 }
