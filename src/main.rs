@@ -3,11 +3,7 @@ mod database;
 // mod tests;
 mod routes;
 
-use actix_web::{
-    get, post, put,
-    web::{self, Data},
-    App, HttpServer, Responder,
-};
+use actix_web::{get, post, put, web::Data, App, HttpServer, Responder};
 use icalendar::{Calendar, Component, DatePerhapsTime};
 // use rusqlite::Result;
 use serde::Deserialize;
@@ -121,7 +117,7 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
-    let conn = sea_orm::Database::connect(String::from("sqlite://users.sqlite?mode=rwc"))
+    let conn = sea_orm::Database::connect(String::from("sqlite://db.sqlite?mode=rwc"))
         .await
         .unwrap();
 

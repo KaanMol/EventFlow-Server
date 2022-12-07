@@ -21,7 +21,7 @@ impl Database {
     pub async fn connect() -> Result<Self, sea_orm::DbErr> {
         // let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-        let mut options = sea_orm::ConnectOptions::new("sqlite://users.sqlite?mode=rwc".to_owned());
+        let mut options = sea_orm::ConnectOptions::new("sqlite://db.sqlite?mode=rwc".to_owned());
 
         options
             .max_connections(100)
