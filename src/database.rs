@@ -1,5 +1,7 @@
 use entity::user::Entity as User;
 use sea_orm::{ActiveModelTrait, EntityTrait};
+
+use crate::routes::{CreateUserBody, LinkIcalBody};
 // struct User {
 //     id: String,
 //     name: String,
@@ -45,11 +47,24 @@ impl Database {
 
     pub async fn create_user(
         conn: &sea_orm::DbConn,
-        name: String,
+        user: CreateUserBody,
     ) -> Result<entity::user::Model, sea_orm::DbErr> {
         entity::user::ActiveModel {
             id: sea_orm::ActiveValue::Set(uuid::Uuid::new_v4().to_string()),
-            name: sea_orm::ActiveValue::Set(name),
+            name: sea_orm::ActiveValue::Set(user.name),
+        }
+        .insert(conn)
+        .await
+    }
+
+    pub async fn create_and_link_ical(
+        conn: &sea_orm::DbConn,
+        ical: LinkIcalBody,
+    ) -> Result<entity::ical::Model, sea_orm::DbErr> {
+        entity::ical::ActiveModel {
+            id: sea_orm::ActiveValue::NotSet,
+            link: sea_orm::ActiveValue::Set(ical.url),
+            user: sea_orm::ActiveValue::Set(ical.user),
         }
         .insert(conn)
         .await
