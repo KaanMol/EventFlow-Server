@@ -133,6 +133,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(state.clone()))
             .service(routes::create_user)
             .service(routes::create_and_link_ical)
+            .service(routes::get_icals_for_user)
     };
 
     HttpServer::new(app).bind(("127.0.0.1", 8080))?.run().await

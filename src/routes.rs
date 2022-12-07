@@ -1,5 +1,5 @@
 use actix_web::{
-    web::{Data, Json},
+    web::{Data, Json, Path},
     HttpResponse,
 };
 
@@ -25,6 +25,14 @@ pub async fn create_and_link_ical(
     body: Json<LinkIcalBody>,
 ) -> HttpResponse {
     reply(state.database.create_and_link_ical(body.clone()).await)
+}
+
+#[actix_web::get("/user/{user_id}")]
+pub async fn get_icals_for_user(
+    state: Data<super::AppState>,
+    user_id: Path<String>,
+) -> HttpResponse {
+    reply(state.database.get_icals_for_user(user_id.clone()).await)
 }
 
 pub fn reply<T: serde::Serialize>(

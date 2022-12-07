@@ -1,14 +1,9 @@
+use entity::ical::Entity as Ical;
 use entity::user::Entity as User;
-use sea_orm::{ActiveModelTrait, EntityTrait};
+
+use sea_orm::{ActiveModelTrait, EntityTrait, QueryFilter, Related};
 
 use crate::routes::{CreateUserBody, LinkIcalBody};
-
-pub struct Ical {
-    pub id: Option<i32>,
-    pub user_id: String,
-    pub name: String,
-    pub url: String,
-}
 
 #[derive(Debug, Clone)]
 pub struct Database {
@@ -62,6 +57,18 @@ impl Database {
         }
         .insert(&self.conn)
         .await
+    }
+
+    pub async fn get_icals_for_user(
+        &self,
+        user: impl Into<String>,
+    ) -> Result<Vec<entity::ical::Model>, sea_orm::DbErr> {
+        let user = User::find_by_id(user.into()).one(&self.conn).await?;
+        let icals = User::find_related()
+            .belongs_to(&user.unwrap())
+            .all(&self.conn)
+            .await?;
+        Ok(icals)
     }
 
     pub fn get_connection(&self) -> &sea_orm::DatabaseConnection {
