@@ -14,3 +14,4 @@ reqwest = {version = "0.11", features = ["blocking"]}
 async-std = { version = "^1", features = ["attributes", "tokio1"] }
 scraper = "0.13.0"
 headless_chrome = {git = "https://github.com/atroche/rust-headless-chrome", features = ["fetch"]}
+chrono = "0.4.23"

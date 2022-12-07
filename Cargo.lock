@@ -2142,6 +2142,7 @@ name = "ns_scraper"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "chrono",
  "headless_chrome",
  "reqwest",
  "scraper",
