@@ -21,7 +21,7 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Ical::Link).string().not_null())
-                    .col(ColumnDef::new(Ical::User).string().unique_key())
+                    .col(ColumnDef::new(Ical::User).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("user_ical")
