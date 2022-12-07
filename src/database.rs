@@ -2,10 +2,6 @@ use entity::user::Entity as User;
 use sea_orm::{ActiveModelTrait, EntityTrait};
 
 use crate::routes::{CreateUserBody, LinkIcalBody};
-// struct User {
-//     id: String,
-//     name: String,
-// }
 
 pub struct Ical {
     pub id: Option<i32>,
@@ -21,8 +17,6 @@ pub struct Database {
 
 impl Database {
     pub async fn connect() -> Result<Self, sea_orm::DbErr> {
-        // let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
         let mut options = sea_orm::ConnectOptions::new("sqlite://db.sqlite?mode=rwc".to_owned());
 
         options
@@ -40,25 +34,25 @@ impl Database {
         })
     }
 
-    pub async fn get_all_users(conn: &sea_orm::DbConn, name: String) -> Vec<entity::user::Model> {
-        let user = User::find().all(conn).await.unwrap();
+    pub async fn get_all_users(&self, name: String) -> Vec<entity::user::Model> {
+        let user = User::find().all(&self.conn).await.unwrap();
         user
     }
 
     pub async fn create_user(
-        conn: &sea_orm::DbConn,
+        &self,
         user: CreateUserBody,
     ) -> Result<entity::user::Model, sea_orm::DbErr> {
         entity::user::ActiveModel {
             id: sea_orm::ActiveValue::Set(uuid::Uuid::new_v4().to_string()),
             name: sea_orm::ActiveValue::Set(user.name),
         }
-        .insert(conn)
+        .insert(&self.conn)
         .await
     }
 
     pub async fn create_and_link_ical(
-        conn: &sea_orm::DbConn,
+        &self,
         ical: LinkIcalBody,
     ) -> Result<entity::ical::Model, sea_orm::DbErr> {
         entity::ical::ActiveModel {
@@ -66,7 +60,7 @@ impl Database {
             link: sea_orm::ActiveValue::Set(ical.url),
             user: sea_orm::ActiveValue::Set(ical.user),
         }
-        .insert(conn)
+        .insert(&self.conn)
         .await
     }
 

@@ -18,7 +18,7 @@ pub enum Errors {
 }
 #[derive(Debug, Clone)]
 pub struct AppState {
-    conn: sea_orm::DatabaseConnection,
+    pub database: crate::database::Database,
 }
 
 #[actix_web::main]
@@ -117,11 +117,15 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
-    let conn = sea_orm::Database::connect(String::from("sqlite://db.sqlite?mode=rwc"))
-        .await
-        .unwrap();
+    // let conn = sea_orm::Database::connect(String::from("sqlite://db.sqlite?mode=rwc"))
+    //     .await
+    //     .unwrap();
 
-    let state = AppState { conn };
+    let database = database::Database::connect()
+        .await
+        .expect("could not connect to database");
+
+    let state = AppState { database };
 
     let actix_data = Data::new(filtered_calendar);
     let app = move || {
