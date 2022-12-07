@@ -7,11 +7,22 @@ pub struct CreateUserBody {
 pub async fn create_user(
     state: actix_web::web::Data<super::AppState>,
     user: actix_web::web::Json<CreateUserBody>,
-) -> impl actix_web::Responder {
-    println!("Registering user {:?}", user.name);
+) -> actix_web::HttpResponse {
+    reply(super::database::Database::create_user(&state.conn, user.name.clone()).await)
+}
 
-    let new_user = super::database::Database::create_user(&state.conn, user.name.clone()).await;
-    println!("{:?}", new_user);
+pub fn reply<T: serde::Serialize>(
+    result: Result<T, impl std::error::Error>,
+) -> actix_web::HttpResponse {
+    match result {
+        Ok(result) => actix_web::HttpResponse::Ok().json(result),
+        Err(e) => actix_web::HttpResponse::InternalServerError().json(WebError {
+            message: e.to_string(),
+        }),
+    }
+}
 
-    ""
+#[derive(serde::Serialize)]
+struct WebError {
+    message: String,
 }
