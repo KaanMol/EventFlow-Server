@@ -14,7 +14,7 @@ impl MigrationTrait for Migration {
                     .table(Ical::Table)
                     .if_not_exists()
                     .col(
-                        ColumnDef::new(Ical::Id)
+                        ColumnDef::new(Ical::Id) // TODO: Make this a composite primary key between link and user
                             .integer()
                             .not_null()
                             .auto_increment()
