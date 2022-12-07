@@ -26,4 +26,5 @@ dotenv = "0.15.0"
 sea-orm = { version = "0.10", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros" ] }
 tracing = "0.1.37"
 entity = { path = "./entity" }
+ns_scraper = { path = "./ns_scraper" }
 uuid = { version = "1.2.2", features = ["serde", "v4"] }

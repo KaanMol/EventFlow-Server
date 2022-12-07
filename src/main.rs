@@ -29,7 +29,8 @@ pub struct AppState {
 async fn main() -> std::io::Result<()> {
     // let database = database::Database::connect().expect("Failed to connect to database");
     // //let users = database
-
+    let time = ns_scraper::scrape("URL".to_string()).await;
+    println!("Expected traveltime: {}", time);
     // return Ok("");
 
     // let database = database::Database::connect();
