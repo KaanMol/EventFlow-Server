@@ -9,6 +9,7 @@ use actix_web::{
     App, HttpServer, Responder,
 };
 use icalendar::{Calendar, Component, DatePerhapsTime};
+use ns_scraper::{route::Coordinate, route_builder::RouteFinderBuilder};
 // use rusqlite::Result;
 use serde::Deserialize;
 
@@ -29,8 +30,16 @@ pub struct AppState {
 async fn main() -> std::io::Result<()> {
     // let database = database::Database::connect().expect("Failed to connect to database");
     // //let users = database
-    let time = ns_scraper::scrape("URL".to_string()).await;
-    println!("Expected traveltime: {}", time);
+    let route = RouteFinderBuilder::new()
+        .from(Coordinate::new(53.2217513, 6.530674))
+        .to(Coordinate::new(51.5051517, 3.58268))
+        .depart_at(chrono::NaiveTime::from_hms_opt(23, 0, 0).unwrap())
+        .build()
+        .expect("Failed to build route finder")
+        .find();
+
+    println!("Route: {:#?}", route);
+    println!("Expected traveltime: {}m", route.travel_time.num_minutes());
     // return Ok("");
 
     // let database = database::Database::connect();
