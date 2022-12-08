@@ -1,7 +1,5 @@
 use sea_orm_migration::prelude::*;
 
-// Disable warnings for unreachable code
-
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -11,43 +9,53 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Ical::Table)
+                    .table(CalendarFilter::Table)
                     .if_not_exists()
                     .col(
-                        ColumnDef::new(Ical::Id)
+                        ColumnDef::new(CalendarFilter::Id)
                             .integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Ical::Url).string().not_null())
-                    .col(ColumnDef::new(Ical::Calendar).string().not_null())
+                    .col(ColumnDef::new(CalendarFilter::Calendar).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("calendarId")
-                            .from(Ical::Table, Ical::Calendar)
+                            .from(CalendarFilter::Table, CalendarFilter::Calendar)
                             .to(
                                 crate::m20221207_221915_create_calendar::Calendar::Table,
                                 crate::m20221207_221915_create_calendar::Calendar::Id,
                             ),
                     )
+                    .col(
+                        ColumnDef::new(Calendar::Field)
+                            .enumeration("field", super::field::Field)
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(Calendar::Text).string().not_null())
                     .to_owned(),
             )
             .await
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        // Replace the sample below with your own migration scripts
+        todo!();
+
         manager
-            .drop_table(Table::drop().table(Ical::Table).to_owned())
+            .drop_table(Table::drop().table(CalendarFilter::Table).to_owned())
             .await
     }
 }
 
 /// Learn more at https://docs.rs/sea-query#iden
 #[derive(Iden)]
-enum Ical {
+enum CalendarFilter {
     Table,
     Id,
-    Url,
     Calendar,
+    Field,
+    Operation,
+    Value,
 }
