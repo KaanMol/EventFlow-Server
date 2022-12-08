@@ -27,7 +27,7 @@ impl MigrationTrait for Migration {
 
 /// Learn more at https://docs.rs/sea-query#iden
 #[derive(Iden)]
-enum User {
+pub enum User {
     Table,
     Id,
     Name,
