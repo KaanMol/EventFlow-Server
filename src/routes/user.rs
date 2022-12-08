@@ -10,7 +10,7 @@ use entity::user as User;
 use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait};
 
 #[derive(serde::Deserialize, Clone)]
-struct CreateUserBody {
+pub struct CreateUserBody {
     name: String,
 }
 
@@ -25,7 +25,7 @@ pub async fn create(state: Data<AppState>, body: Json<CreateUserBody>) -> HttpRe
     .reply()
 }
 
-#[actix_web::get("/user/all")]
+#[actix_web::get("/user")]
 pub async fn read_all(state: Data<AppState>) -> HttpResponse {
     User::Entity::find().all(&state.database).await.reply()
 }
@@ -35,5 +35,5 @@ pub async fn read(state: Data<AppState>, user_id: Path<String>) -> HttpResponse 
     User::Entity::find_by_id(user_id.clone())
         .one(&state.database)
         .await
-        .reply_option()
+        .reply_option("Could not find user")
 }
