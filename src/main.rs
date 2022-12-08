@@ -1,228 +1,51 @@
 mod calendar;
 mod database;
-// mod tests;
+mod errors;
+mod routes;
 
-use actix_web::{
-    cookie::time::format_description::parse,
-    get, post, put,
-    web::{self, Data},
-    App, HttpServer, Responder,
-};
-use chrono::TimeZone;
-use icalendar::{Calendar, Component, DatePerhapsTime};
-use rusqlite::Result;
-use serde::Deserialize;
+use actix_web::{web::Data, App, HttpServer};
 
-#[derive(thiserror::Error, Debug, Clone)]
-pub enum Errors {
-    #[error("Couldn't parse the Calendar. iCal link is probably invalid.")]
-    CalendarParseError,
-
-    #[error("Invalid iCal link: {0}")]
-    InvalidLinkError(String),
+#[derive(Clone)]
+pub struct AppState {
+    pub database: sea_orm::DatabaseConnection,
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // let database = database::Database::connect();
-    let mut calendar2 = calendar::Calendar::new();
-
-    println!("running");
-
-    let mut calendars: Vec<Calendar> = Vec::new();
-    let calendar_urls = vec!["https://rooster.universiteitleiden.nl/ical?63879a34&eu=czM1MjYyMDg=&h=51dOpLAHe66E7JZLBpxfnKSLWj3m-acHtjbF8CO9x48="];
-
-    println!("getting calendars");
-
-    for calendar in calendar_urls {
-        let calendar: Result<Calendar, Errors> = get_calendar(String::from(calendar)).await;
-
-        match calendar {
-            Ok(calendar) => calendars.push(calendar),
-            Err(e) => println!("Error: {:?}", e.to_string()),
-        }
-    }
-
-    for calendar in calendars.iter() {
-        for events in calendar.components.iter() {
-            if let None = events.as_event() {
-                continue;
-            }
-
-            // TODO: Fix this mess
-            let title = events.as_event().unwrap().get_summary().unwrap();
-            let start_date = events.as_event().unwrap().get_start().unwrap();
-            let start_date = dateperhapstime_to_datetime(start_date);
-
-            let end_date = events.as_event().unwrap().get_end().unwrap();
-            let end_date = dateperhapstime_to_datetime(end_date);
-
-            println!("date: {:?}", start_date);
-
-            let description = {
-                if let Some(description) = events.as_event().unwrap().get_description() {
-                    description
-                } else {
-                    ""
-                }
-            };
-
-            calendar2.add_event(calendar::CalendarEvent {
-                name: title.to_string(),
-                start_date,
-                end_date,
-                description: description.to_string(),
-            });
-        }
-    }
-
-    let comparisons = vec![
-        calendar::EventComparison {
-            field: calendar::Field::Summary,
-            comparator: calendar::Filter::Is,
-            value: "Servicemedewerker".to_string(),
-        },
-        calendar::EventComparison {
-            field: calendar::Field::Summary,
-            comparator: calendar::Filter::Is,
-            value: "Niet".to_string(),
-        },
-        calendar::EventComparison {
-            field: calendar::Field::Summary,
-            comparator: calendar::Filter::Contains,
-            value: "6461PS002W".to_string(),
-        },
-    ];
-
-    let operations = vec![
-        calendar::EventOperation {
-            field: calendar::Field::Summary,
-            operation: calendar::Filter::Is,
-            value: "Niet".to_string(),
-            new_value: "Servicemedewerker (Niet beschikbaar)".to_string(),
-        },
-        calendar::EventOperation {
-            field: calendar::Field::Summary,
-            operation: calendar::Filter::Is,
-            value: "6461PS002W - Introduction to Psychology WG".to_string(),
-            new_value: "Inleiding in de Psychologie Werkgroep".to_string(),
-        },
-    ];
-
-    let filtered_calendar = calendar2.filter(comparisons); // .operations(operations);
+    let route = RouteFinderBuilder::new()
+        .from(Coordinate::new(53.2217513, 6.530674))
+        .to(Coordinate::new(51.5051517, 3.58268))
+        .depart_at(chrono::NaiveTime::from_hms_opt(23, 0, 0).unwrap())
+        .build()
+        .expect("Failed to build route finder")
+        .find();
+        
+    println!("Route: {:#?}", route);
+    println!("Expected traveltime: {}m", route.travel_time.num_minutes());
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
-    let actix_data = Data::new(filtered_calendar);
+    // Create a connection pool to the database
+    let database = database::Database::connect()
+        .await
+        .expect("could not connect to database"); // TODO: handle this error
+
+    // Initialise the app state for Actix
+    let state = AppState { database };
+
+    // Create the Actix app
     let app = move || {
         App::new()
-            .service(create_user)
-            .app_data(Data::clone(&actix_data))
-            .service(calendar_route)
-            .service(get_icals)
-            .service(set_ical)
+            .app_data(Data::new(state.clone()))
+            .service(routes::user::create)
+            .service(routes::user::read_all)
+            .service(routes::user::read)
+            .service(routes::calendar::create)
+            .service(routes::calendar::read_all)
+            .service(routes::calendar::read_for_user)
+            .service(routes::calendar::read)
     };
 
+    // Start the Actix server
     HttpServer::new(app).bind(("127.0.0.1", 8080))?.run().await
-}
-
-#[get("/ical/{user_id}")]
-async fn get_icals(user_id: web::Path<String>) -> impl Responder {
-    let db = database::Database::connect();
-    let icals = db.get_ical_urls(user_id.to_string()).unwrap();
-
-    let ical_urls = icals
-        .iter()
-        .map(|ical| ical.url.clone())
-        .collect::<Vec<String>>();
-
-    println!("icals: {} {:?}", icals.len(), ical_urls);
-
-    ical_urls.join("\n")
-}
-
-#[derive(Deserialize)]
-struct Ical {
-    name: String,
-    url: String,
-}
-
-#[post("/ical/{user_id}")]
-async fn set_ical(user_id: web::Path<String>, ical: web::Json<Ical>) -> impl Responder {
-    let db = database::Database::connect();
-
-    //TODO: Fix the clones in the future
-    match db.add_ical(database::Ical {
-        id: None,
-        user_id: user_id.to_string(),
-        name: ical.name.clone(),
-        url: ical.url.clone(),
-    }) {
-        Ok(_) => "ok".to_string(),
-        Err(e) => e.to_string(), // todo: make this return error code 50X
-    }
-}
-
-#[get("/calendar")]
-async fn calendar_route(calendar: web::Data<calendar::Calendar>) -> impl Responder {
-    calendar.to_ical()
-}
-
-#[post("/user/{name}")]
-async fn create_user(name: web::Path<String>) -> impl Responder {
-    println!("Registering user {:?}", name.as_str());
-    let db = database::Database::connect();
-
-    match db.create_user(name.to_string()) {
-        Ok(e) => e,
-        Err(e) => e.to_string(), // todo: make this return error code 50X
-    }
-}
-
-async fn get_calendar(ical: String) -> Result<Calendar, Errors> {
-    let calendar_ics = get_ical_by_url(ical.clone())
-        .await
-        .map_err(|_| Errors::InvalidLinkError(ical))?;
-
-    Ok(calendar_ics
-        .parse::<Calendar>()
-        .map_err(|_| Errors::CalendarParseError)?)
-}
-
-async fn get_ical_by_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
-    let client = reqwest::Client::new();
-    let body = client.get(&url).send().await?.text().await?;
-
-    Ok(body)
-}
-
-fn dateperhapstime_to_datetime(date: DatePerhapsTime) -> calendar::DateTime {
-    // TODO: unwraps ...
-
-    let mut timezone = chrono_tz::UTC;
-
-    let date = match date {
-        icalendar::DatePerhapsTime::Date(date) => {
-            let date =
-                chrono::NaiveDateTime::new(date, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
-            // chrono::Utc.from_local_datetime(&date).unwrap()
-            date
-        }
-        icalendar::DatePerhapsTime::DateTime(date) => match date {
-            icalendar::CalendarDateTime::Floating(date) => {
-                // chrono::Utc.from_local_datetime(&date).unwrap()
-                date
-            }
-            icalendar::CalendarDateTime::Utc(date) => date.naive_utc(),
-            icalendar::CalendarDateTime::WithTimezone { date_time, tzid } => {
-                timezone = tzid.parse().unwrap();
-                date_time
-                // timezone = tzid.parse().unwrap();
-                // let local_date_time = timezone.from_local_datetime(&date_time).unwrap();
-                // local_date_time.with_timezone(&chrono::Utc)
-            }
-        },
-    };
-
-    calendar::DateTime { date, timezone }
 }
