@@ -30,6 +30,10 @@ async fn main() -> std::io::Result<()> {
             .service(routes::user::create)
             .service(routes::user::read_all)
             .service(routes::user::read)
+            .service(routes::calendar::create)
+            .service(routes::calendar::read_all)
+            .service(routes::calendar::read_for_user)
+            .service(routes::calendar::read)
     };
 
     // Start the Actix server
