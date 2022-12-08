@@ -15,6 +15,7 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(ColumnDef::new(Calendar::Id).uuid().not_null().primary_key())
                     .col(ColumnDef::new(Calendar::User).string().not_null())
+                    .col(ColumnDef::new(Calendar::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("userId")
@@ -41,6 +42,6 @@ impl MigrationTrait for Migration {
 pub enum Calendar {
     Table,
     Id,
-    Link,
+    Name,
     User,
 }
