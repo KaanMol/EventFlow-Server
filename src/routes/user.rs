@@ -3,7 +3,7 @@ use crate::{
     AppState,
 };
 use actix_web::{
-    web::{Data, Json},
+    web::{Data, Json, Path},
     HttpResponse,
 };
 use entity::user as User;
@@ -15,7 +15,7 @@ struct CreateUserBody {
 }
 
 #[actix_web::post("/user")]
-pub async fn create_user(state: Data<AppState>, body: Json<CreateUserBody>) -> HttpResponse {
+pub async fn create(state: Data<AppState>, body: Json<CreateUserBody>) -> HttpResponse {
     User::ActiveModel {
         id: ActiveValue::Set(uuid::Uuid::new_v4().to_string()),
         name: ActiveValue::Set(body.name.clone()),
@@ -26,13 +26,13 @@ pub async fn create_user(state: Data<AppState>, body: Json<CreateUserBody>) -> H
 }
 
 #[actix_web::get("/user/all")]
-pub async fn get_all_users(state: Data<AppState>) -> HttpResponse {
+pub async fn read_all(state: Data<AppState>) -> HttpResponse {
     User::Entity::find().all(&state.database).await.reply()
 }
 
 #[actix_web::get("/user/{user_id}")]
-pub async fn get_user_by_id(state: Data<AppState>, user_id: String) -> HttpResponse {
-    User::Entity::find_by_id(user_id)
+pub async fn read(state: Data<AppState>, user_id: Path<String>) -> HttpResponse {
+    User::Entity::find_by_id(user_id.clone())
         .one(&state.database)
         .await
         .reply_option()

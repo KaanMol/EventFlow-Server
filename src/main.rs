@@ -27,9 +27,9 @@ async fn main() -> std::io::Result<()> {
     let app = move || {
         App::new()
             .app_data(Data::new(state.clone()))
-            .service(routes::user::create_user)
-            .service(routes::user::get_all_users)
-            .service(routes::user::get_user_by_id)
+            .service(routes::user::create)
+            .service(routes::user::read_all)
+            .service(routes::user::read)
     };
 
     // Start the Actix server
