@@ -28,8 +28,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(Data::new(state.clone()))
             .service(routes::user::create_user)
-            .service(routes::user::get_user_by_id)
             .service(routes::user::get_all_users)
+            .service(routes::user::get_user_by_id)
     };
 
     // Start the Actix server
