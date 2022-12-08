@@ -8,25 +8,25 @@ use serde::Serialize;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    pub link: String,
-    pub user: String,
+    pub url: String,
+    pub calendar: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::User",
-        to = "super::user::Column::Id",
+        belongs_to = "super::calendar::Entity",
+        from = "Column::Calendar",
+        to = "super::calendar::Column::Id",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    User,
+    Calendar,
 }
 
-impl Related<super::user::Entity> for Entity {
+impl Related<super::calendar::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::User.def()
+        Relation::Calendar.def()
     }
 }
 

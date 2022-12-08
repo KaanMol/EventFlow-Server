@@ -1,3 +1,4 @@
+use sea_orm::IdenStatic;
 use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
@@ -29,20 +30,34 @@ impl MigrationTrait for Migration {
                             ),
                     )
                     .col(
-                        ColumnDef::new(Calendar::Field)
-                            .enumeration("field", super::field::Field)
+                        ColumnDef::new(CalendarFilter::Field)
+                            .enumeration(
+                                super::field::Field::Enum,
+                                [super::field::Field::Title, super::field::Field::Description],
+                            )
                             .not_null(),
                     )
-                    .col(ColumnDef::new(Calendar::Text).string().not_null())
+                    .col(
+                        ColumnDef::new(CalendarFilter::Operation)
+                            .enumeration(
+                                super::operation::Operation::Enum,
+                                [
+                                    super::operation::Operation::Is,
+                                    super::operation::Operation::IsNot,
+                                    super::operation::Operation::Contains,
+                                    super::operation::Operation::DoesNotContain,
+                                    super::operation::Operation::RegularExpression,
+                                ],
+                            )
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(CalendarFilter::Value).string().not_null())
                     .to_owned(),
             )
             .await
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        // Replace the sample below with your own migration scripts
-        todo!();
-
         manager
             .drop_table(Table::drop().table(CalendarFilter::Table).to_owned())
             .await

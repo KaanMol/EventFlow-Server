@@ -1,6 +1,11 @@
-#[derive(sea_orm::EnumIter, sea_orm::DeriveActiveEnum)]
-#[sea_orm(rs_type = "i32", db_type = "Integer")]
+use sea_orm_migration::prelude::*;
+
+#[derive(Iden)]
 pub enum Field {
-    Title = 0,
-    Description = 1,
+    #[iden = "field"]
+    Enum,
+    #[iden = "Title"]
+    Title,
+    #[iden = "Description"]
+    Description,
 }

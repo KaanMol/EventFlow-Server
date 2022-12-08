@@ -1,9 +1,17 @@
-#[derive(sea_orm::EnumIter, sea_orm::DeriveActiveEnum)]
-#[sea_orm(rs_type = "i32", db_type = "Integer")]
+use sea_orm_migration::prelude::*;
+
+#[derive(Iden)]
 pub enum Operation {
-    Is = 0,
-    IsNot = 1,
-    Contains = 2,
-    DoesNotContain = 3,
-    RegularExpression = 4,
+    #[iden = "operation"]
+    Enum,
+    #[iden = "Is"]
+    Is,
+    #[iden = "IsNot"]
+    IsNot,
+    #[iden = "Contains"]
+    Contains,
+    #[iden = "DoesNotContain"]
+    DoesNotContain,
+    #[iden = "RegularExpression"]
+    RegularExpression,
 }
