@@ -1,4 +1,5 @@
-use crate::{routes::HttpResponseConverter, AppState};
+use crate::routes::{ErrorConverter, ResultConverter};
+use crate::AppState;
 use actix_web::{
     web::{Data, Path},
     HttpResponse,

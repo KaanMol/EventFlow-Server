@@ -1,23 +1,51 @@
 pub mod ical;
 pub mod user;
 
-trait HttpResponseConverter<E: std::error::Error> {
+trait Converter {
     fn reply(self) -> actix_web::HttpResponse;
 }
 
-// Convert a Result<T, E> into a HttpResponse
-impl<T: serde::Serialize, E: std::error::Error> HttpResponseConverter<E> for Result<T, E> {
+trait ResultConverter {
+    fn reply(self) -> actix_web::HttpResponse;
+}
+
+trait OptionConverter {
+    fn reply_option(self) -> actix_web::HttpResponse;
+}
+
+trait ErrorConverter<E: std::error::Error> {
+    fn reply(self) -> actix_web::HttpResponse;
+}
+
+impl<T: serde::Serialize> Converter for T {
+    fn reply(self) -> actix_web::HttpResponse {
+        actix_web::HttpResponse::Ok().json(self)
+    }
+}
+
+impl<T: serde::Serialize, E: std::error::Error> ResultConverter for Result<T, E> {
     fn reply(self) -> actix_web::HttpResponse {
         match self {
-            Ok(result) => actix_web::HttpResponse::Ok().json(result),
+            Ok(result) => result.reply(),
             Err(e) => e.reply(),
         }
     }
 }
 
-// Convert an Error into a HttpResponse
-impl<E: std::error::Error> HttpResponseConverter<E> for E {
+impl<T: serde::Serialize, E: std::error::Error> OptionConverter for Result<Option<T>, E> {
+    fn reply_option(self) -> actix_web::HttpResponse {
+        match self {
+            Ok(result) => match result {
+                Some(result) => result.reply(),
+                None => actix_web::HttpResponse::NotFound().json("No entities found"),
+            },
+            Err(e) => e.reply(),
+        }
+    }
+}
+
+impl<E: std::error::Error> ErrorConverter<E> for E {
     fn reply(self) -> actix_web::HttpResponse {
-        actix_web::HttpResponse::InternalServerError().json(format!("{:#?}", self))
+        actix_web::HttpResponse::InternalServerError().json(format!("{:?}", self))
     }
 }
