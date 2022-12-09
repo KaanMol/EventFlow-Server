@@ -14,11 +14,11 @@ impl MigrationTrait for Migration {
                     .table(Calendar::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(Calendar::Id).uuid().not_null().primary_key())
-                    .col(ColumnDef::new(Calendar::User).string().not_null())
                     .col(ColumnDef::new(Calendar::Name).string().not_null())
+                    .col(ColumnDef::new(Calendar::User).uuid().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("userId")
+                            .name("fk-calendar-user_id")
                             .from(Calendar::Table, Calendar::User)
                             .to(
                                 crate::m20220101_000001_create_users::User::Table,

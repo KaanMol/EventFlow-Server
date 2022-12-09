@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: database
+    ports:
+      - 3306:3306
+  adminer:
+    image: adminer
+    ports:
+      - 5050:8080

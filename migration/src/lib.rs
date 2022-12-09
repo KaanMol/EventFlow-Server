@@ -15,8 +15,8 @@ impl MigratorTrait for Migrator {
     fn migrations() -> Vec<Box<dyn MigrationTrait>> {
         vec![
             Box::new(m20220101_000001_create_users::Migration),
-            Box::new(m20221207_121314_create_icals::Migration),
             Box::new(m20221207_221915_create_calendar::Migration),
+            Box::new(m20221207_121314_create_icals::Migration),
             Box::new(m20221207_223411_create_calendar_filter::Migration),
             Box::new(m20221207_223420_create_calendar_event_modifier::Migration),
         ]

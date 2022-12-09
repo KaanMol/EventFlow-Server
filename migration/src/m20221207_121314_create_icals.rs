@@ -21,10 +21,10 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Ical::Url).string().not_null())
-                    .col(ColumnDef::new(Ical::Calendar).string().not_null())
+                    .col(ColumnDef::new(Ical::Calendar).uuid().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("calendarId")
+                            .name("fk-ical-user_id")
                             .from(Ical::Table, Ical::Calendar)
                             .to(
                                 crate::m20221207_221915_create_calendar::Calendar::Table,

@@ -20,12 +20,12 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(CalendarEventModifier::Calendar)
-                            .string()
+                            .uuid()
                             .not_null(),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("calendarId")
+                            .name("fk-calendar_event_modifier-calendar_id")
                             .from(
                                 CalendarEventModifier::Table,
                                 CalendarEventModifier::Calendar,

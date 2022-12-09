@@ -19,10 +19,10 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(CalendarFilter::Calendar).string().not_null())
+                    .col(ColumnDef::new(CalendarFilter::Calendar).uuid().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("calendarId")
+                            .name("fk-calendar_filter-calendar_id")
                             .from(CalendarFilter::Table, CalendarFilter::Calendar)
                             .to(
                                 crate::m20221207_221915_create_calendar::Calendar::Table,
