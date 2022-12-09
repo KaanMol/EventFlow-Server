@@ -4,6 +4,7 @@ mod errors;
 mod routes;
 
 use actix_web::{web::Data, App, HttpServer};
+use ns_scraper::{route::Coordinate, route_builder::RouteFinderBuilder};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -12,16 +13,17 @@ pub struct AppState {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let route = RouteFinderBuilder::new()
-        .from(Coordinate::new(53.2217513, 6.530674))
-        .to(Coordinate::new(51.5051517, 3.58268))
-        .depart_at(chrono::NaiveTime::from_hms_opt(23, 0, 0).unwrap())
-        .build()
-        .expect("Failed to build route finder")
-        .find();
-        
-    println!("Route: {:#?}", route);
-    println!("Expected traveltime: {}m", route.travel_time.num_minutes());
+    // let route = RouteFinderBuilder::new()
+    //     .from(Coordinate::new(53.2217513, 6.530674))
+    //     .to(Coordinate::new(51.5051517, 3.58268))
+    //     .depart_at(chrono::NaiveTime::from_hms_opt(23, 0, 0).unwrap())
+    //     .build()
+    //     .expect("Failed to build route finder")
+    //     .find();
+
+    // println!("Route: {:#?}", route);
+    // println!("Expected traveltime: {}m", route.travel_time.num_minutes());
+
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
@@ -41,9 +43,9 @@ async fn main() -> std::io::Result<()> {
             .service(routes::user::read_all)
             .service(routes::user::read)
             .service(routes::calendar::create)
-            .service(routes::calendar::read_all)
             .service(routes::calendar::read_for_user)
-            .service(routes::calendar::read)
+            .service(routes::ical::create)
+            .service(routes::ical::read_for_calandar)
     };
 
     // Start the Actix server

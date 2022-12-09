@@ -2,6 +2,7 @@ use actix_web::HttpResponse;
 
 pub mod calendar;
 pub mod user;
+pub mod ical;
 
 trait Converter {
     fn reply(self) -> HttpResponse;

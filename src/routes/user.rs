@@ -7,7 +7,7 @@ use actix_web::{
     HttpResponse,
 };
 use entity::user as User;
-use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue, DatabaseConnection, EntityTrait};
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateUserBody {
@@ -37,3 +37,5 @@ pub async fn read(state: Data<AppState>, user_id: Path<String>) -> HttpResponse 
         .await
         .reply_option("Could not find user")
 }
+
+// TODO: Delete user
