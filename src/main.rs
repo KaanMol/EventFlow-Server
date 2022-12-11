@@ -38,14 +38,13 @@ async fn main() -> std::io::Result<()> {
     // Create the Actix app
     let app = move || {
         App::new()
+            .wrap(actix_web::middleware::Logger::default())
             .app_data(Data::new(state.clone()))
             .service(routes::user::create)
             .service(routes::user::read_all)
             .service(routes::user::read)
             .service(routes::calendar::create)
             .service(routes::calendar::read_for_user)
-            .service(routes::ical::create)
-            .service(routes::ical::read_for_calandar)
     };
 
     // Start the Actix server
