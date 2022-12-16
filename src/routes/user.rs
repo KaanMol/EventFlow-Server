@@ -1,11 +1,10 @@
-use crate::AppState;
+use crate::{entity, AppState};
 use actix_web::{
     error,
     web::{Data, Json, Path},
     Error, HttpResponse,
 };
-use entity::user as User;
-use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait};
+use mongodb::bson::oid::ObjectId;
 use uuid::Uuid;
 
 #[derive(serde::Deserialize, Clone)]
@@ -18,31 +17,36 @@ pub async fn create(
     state: Data<AppState>,
     body: Json<CreateUserBody>,
 ) -> Result<HttpResponse, Error> {
-    let user = User::ActiveModel {
-        id: ActiveValue::Set(Uuid::new_v4().to_string()),
-        name: ActiveValue::Set(body.name.clone()),
-    }
-    .insert(&state.database)
-    .await
-    .map_err(|_| error::ErrorBadRequest("Could not create user"))?;
-
-    Ok(HttpResponse::Created().json(user))
-}
-
-#[actix_web::get("/users")]
-pub async fn read_all(state: Data<AppState>) -> Result<HttpResponse, Error> {
-    let users = User::Entity::find()
-        .all(&state.database)
+    let result = state
+        .db
+        .collection::<entity::user::User>("users")
+        .insert_one(
+            entity::user::User {
+                name: body.name.clone(),
+                sources: vec![],
+            },
+            None,
+        )
         .await
-        .map_err(|_| error::ErrorBadRequest("Could not query users"))?;
+        .map_err(|_| error::ErrorBadRequest("Could not create user"))?;
 
-    Ok(HttpResponse::Ok().json(users))
+    Ok(HttpResponse::Created().json(result.inserted_id))
 }
 
 #[actix_web::get("/users/{user_id}")]
 pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpResponse, Error> {
-    let user = User::Entity::find_by_id(user_id.clone())
-        .one(&state.database)
+    let id = ObjectId::parse_str(user_id.as_str())
+        .map_err(|_| error::ErrorBadRequest("Invalid user id"))?;
+
+    let user = state
+        .db
+        .collection::<entity::user::User>("users")
+        .find_one(
+            mongodb::bson::doc! {
+                "_id": id
+            },
+            None,
+        )
         .await
         .map_err(|_| error::ErrorBadRequest("Could not query users"))?
         .ok_or_else(|| error::ErrorNotFound(format!("Could not find user with id {}", user_id)))?;
@@ -50,6 +54,6 @@ pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpRe
     Ok(HttpResponse::Ok().json(user))
 }
 
-// TODO: Update user
+// // TODO: Update user
 
-// TODO: Delete user
+// // TODO: Delete user

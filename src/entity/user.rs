@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct User {
-    name: String,
-    sources: Vec<CalenderEventSource>,
+pub struct User {
+    pub name: String,
+    pub sources: Vec<CalenderEventSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct CalenderEventSource {
+pub struct CalenderEventSource {
     name: String,
     url: String,
     modifiers: Vec<CalenderEventSourceModifier>,
@@ -15,7 +15,7 @@ struct CalenderEventSource {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct CalenderEventSourceModifier {
+pub struct CalenderEventSourceModifier {
     operation: String,
     field: String,
     value: String,
@@ -23,7 +23,7 @@ struct CalenderEventSourceModifier {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct CalendarEventSourceFilters {
+pub struct CalendarEventSourceFilters {
     field: String,
     operator: String,
     value: String,

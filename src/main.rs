@@ -1,5 +1,5 @@
 mod calendar;
-mod database;
+mod entity;
 mod errors;
 mod routes;
 
@@ -43,9 +43,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
             .app_data(Data::new(state.clone()))
-        // .service(routes::user::create)
-        // .service(routes::user::read_all)
-        // .service(routes::user::read)
+            .service(routes::user::create)
+            // .service(routes::user::read_all)
+            .service(routes::user::read)
         // .service(routes::calendar::create)
         // .service(routes::calendar::read_for_user)
     };
