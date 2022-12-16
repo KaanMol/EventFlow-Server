@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct CalendarEvent {
+pub struct CalendarEvent {
     id: String,
     title: String,
     description: String,
@@ -15,14 +15,14 @@ struct CalendarEvent {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Repeat {
+pub struct Repeat {
     repeat: String,
     repeat_every: u32,
     repeat_until: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Metadata {
+pub struct Metadata {
     color: String,
     icon: String,
     tags: Vec<String>,
@@ -30,7 +30,7 @@ struct Metadata {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct OriginalEvent {
+pub struct OriginalEvent {
     title: String,
     description: String,
     start: chrono::NaiveDateTime,
