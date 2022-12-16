@@ -2028,7 +2028,6 @@ dependencies = [
  "async-std",
  "chrono",
  "headless_chrome",
- "reqwest",
  "scraper",
 ]
 
