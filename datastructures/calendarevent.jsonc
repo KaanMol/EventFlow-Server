@@ -1,0 +1,32 @@
+// Calendarevent data structure
+{
+    "_id": "calenderevent id",
+    "title": "",
+    "description": "",
+    "start": "2020-01-01T00:00:00.000Z",
+    "end": "2020-01-01T00:00:00.000Z",
+    "allDay": false,
+    "location": "",
+
+    "repeat": {
+        "repeat": "none", // none, daily, weekly, monthly, yearly
+        "repeatEvery": 1,
+        "repeatUntil": "2020-01-01T00:00:00.000Z"
+    },
+
+    "metadata": {
+        "color": "#000000",
+        "icon": "fa fa-calendar",
+        "tags": ["tag1", "tag2"],
+        "travelTimeMinutes": 0
+    },
+
+    "originalEvent": {
+        "title": "",
+        "description": "",
+        "start": "2020-01-01T00:00:00.000Z",
+        "end": "2020-01-01T00:00:00.000Z",
+        "allDay": false,
+        "location": ""
+    }
+}
