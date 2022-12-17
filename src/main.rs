@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::*;
 
 #[derive(Clone)]
-struct AppState {
+pub struct AppState {
     pub db: mongodb::Database,
     pub client: mongodb::Client,
 }
@@ -44,8 +44,8 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Logger::default())
             .app_data(Data::new(state.clone()))
             .service(routes::user::create)
-            // .service(routes::user::read_all)
             .service(routes::user::read)
+            .service(routes::source::create)
         // .service(routes::calendar::create)
         // .service(routes::calendar::read_for_user)
     };

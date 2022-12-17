@@ -16,10 +16,10 @@ impl fmt::Display for User {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CalenderEventSource {
-    name: String,
-    url: String,
-    modifiers: Vec<CalenderEventSourceModifier>,
-    filter: Vec<CalendarEventSourceFilters>,
+    pub name: String,
+    pub url: String,
+    pub modifiers: Vec<CalenderEventSourceModifier>,
+    pub filters: Vec<CalendarEventSourceFilters>,
 }
 
 impl fmt::Display for CalenderEventSource {
