@@ -28,7 +28,7 @@ pub async fn create(
         "_id": id
     };
 
-    let new_source = entity::user::CalenderEventSource {
+    let new_source = entity::user::CalendarEventSource {
         name: body.name.clone(),
         url: body.url.clone(),
         filters: vec![],

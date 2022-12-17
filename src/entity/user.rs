@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     pub name: String,
-    pub sources: Vec<CalenderEventSource>,
+    pub sources: Vec<CalendarEventSource>,
 }
 
 impl fmt::Display for User {
@@ -15,28 +15,28 @@ impl fmt::Display for User {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CalenderEventSource {
+pub struct CalendarEventSource {
     pub name: String,
     pub url: String,
-    pub modifiers: Vec<CalenderEventSourceModifier>,
+    pub modifiers: Vec<CalendarEventSourceModifier>,
     pub filters: Vec<CalendarEventSourceFilters>,
 }
 
-impl fmt::Display for CalenderEventSource {
+impl fmt::Display for CalendarEventSource {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", super::to_json(&self))
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CalenderEventSourceModifier {
+pub struct CalendarEventSourceModifier {
     operation: String,
     field: String,
     value: String,
     new_value: String,
 }
 
-impl fmt::Display for CalenderEventSourceModifier {
+impl fmt::Display for CalendarEventSourceModifier {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", super::to_json(&self))
     }
