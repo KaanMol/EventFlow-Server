@@ -7,6 +7,7 @@ pub mod calendar;
 pub mod source;
 pub mod user;
 pub mod filter;
+pub mod modifiers;
 
 pub fn parse_id(
     id: impl Into<String>,

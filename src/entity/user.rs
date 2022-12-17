@@ -30,10 +30,10 @@ impl fmt::Display for CalendarEventSource {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CalendarEventSourceModifier {
-    operation: String,
-    field: String,
-    value: String,
-    new_value: String,
+    pub operation: String, // TODO: Convert to enum
+    pub field: String,     // TODO: Convert to enum
+    pub value: String,
+    pub new_value: String,
 }
 
 impl fmt::Display for CalendarEventSourceModifier {

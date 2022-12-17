@@ -47,6 +47,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::user::read)
             .service(routes::source::create)
             .service(routes::filter::create)
+            .service(routes::modifiers::create)
         // .service(routes::calendar::create)
         // .service(routes::calendar::read_for_user)
     };
