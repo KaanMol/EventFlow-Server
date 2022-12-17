@@ -44,10 +44,10 @@ impl fmt::Display for CalendarEventSourceModifier {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CalendarEventSourceFilters {
-    field: String,
-    operator: String,
-    value: String,
-    calendar_id: String,
+    pub field: String,    // TODO: Convert to enum
+    pub operator: String, // TODO: Convert to enum
+    pub value: String,
+    pub calendar_id: String,
 }
 
 impl fmt::Display for CalendarEventSourceFilters {
