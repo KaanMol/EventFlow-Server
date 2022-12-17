@@ -1,11 +1,13 @@
-use crate::{entity, AppState};
+use crate::{
+    entity,
+    routes::{DataResponse, ErrorResponse, Response},
+    AppState,
+};
 use actix_web::{
     error,
     web::{Data, Json, Path},
     Error, HttpResponse,
 };
-use mongodb::bson::oid::ObjectId;
-use uuid::Uuid;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateUserBody {
@@ -28,15 +30,14 @@ pub async fn create(
             None,
         )
         .await
-        .map_err(|_| error::ErrorBadRequest("Could not create user"))?;
+        .map_err(|e| error::ErrorBadRequest(ErrorResponse::new("Could not create user", e)))?;
 
-    Ok(HttpResponse::Created().json(result.inserted_id))
+    Ok(HttpResponse::Created().json(DataResponse::new("Created user", result.inserted_id)))
 }
 
 #[actix_web::get("/users/{user_id}")]
 pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpResponse, Error> {
-    let id = ObjectId::parse_str(user_id.as_str())
-        .map_err(|_| error::ErrorBadRequest("Invalid user id"))?;
+    let id = crate::routes::parse_id(user_id.to_string())?;
 
     let user = state
         .db
@@ -48,10 +49,15 @@ pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpRe
             None,
         )
         .await
-        .map_err(|_| error::ErrorBadRequest("Could not query users"))?
-        .ok_or_else(|| error::ErrorNotFound(format!("Could not find user with id {}", user_id)))?;
+        .map_err(|e| error::ErrorBadRequest(ErrorResponse::new("Could not query users", e)))?
+        .ok_or_else(|| {
+            error::ErrorNotFound(Response::new(format!(
+                "Could not find user with id {}",
+                user_id
+            )))
+        })?;
 
-    Ok(HttpResponse::Ok().json(user))
+    Ok(HttpResponse::Ok().json(DataResponse::new("Found user", user)))
 }
 
 // // TODO: Update user
