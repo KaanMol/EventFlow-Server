@@ -1,15 +1,17 @@
 use core::fmt;
 
+use dotenv::Error;
 use serde::ser::SerializeStruct;
 
 pub mod calendar;
+pub mod source;
 pub mod user;
 
 pub fn parse_id(
     id: impl Into<String>,
 ) -> Result<mongodb::bson::oid::ObjectId, actix_web::error::Error> {
     mongodb::bson::oid::ObjectId::parse_str(id.into())
-        .map_err(|e| actix_web::error::ErrorBadRequest(e))
+        .map_err(|e| actix_web::error::ErrorBadRequest(ErrorResponse::new("Could not parse id", e)))
 }
 
 fn to_json<T>(value: T) -> String
@@ -19,6 +21,16 @@ where
     match serde_json::to_string(&value) {
         Ok(json) => json,
         Err(e) => format!("{}:#?", e),
+    }
+}
+
+fn to_bson<T>(value: T) -> mongodb::bson::Bson
+where
+    T: serde::Serialize,
+{
+    match mongodb::bson::to_bson(&value) {
+        Ok(bson) => bson,
+        Err(e) => mongodb::bson::Bson::String(format!("{}:#?", e)),
     }
 }
 
@@ -92,7 +104,7 @@ where
 #[derive(serde::Serialize, Debug)]
 pub struct DataResponse<T>
 where
-    T: serde::Serialize + std::fmt::Display + std::fmt::Debug,
+    T: serde::Serialize,
 {
     pub message: String,
     pub data: T,
@@ -100,7 +112,7 @@ where
 
 impl<T> DataResponse<T>
 where
-    T: serde::Serialize + std::fmt::Display + std::fmt::Debug,
+    T: serde::Serialize,
 {
     pub fn new(message: impl Into<String>, data: T) -> Self {
         Self {
@@ -112,7 +124,7 @@ where
 
 impl<T> std::fmt::Display for DataResponse<T>
 where
-    T: serde::Serialize + std::fmt::Display + std::fmt::Debug,
+    T: serde::Serialize,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", to_json(&self))
