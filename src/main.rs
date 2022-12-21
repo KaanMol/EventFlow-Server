@@ -41,6 +41,7 @@ async fn main() -> std::io::Result<()> {
     // Create the Actix app
     let app = move || {
         App::new()
+            .wrap(actix_cors::Cors::default().allow_any_origin())
             .wrap(actix_web::middleware::Logger::default())
             .app_data(Data::new(state.clone()))
             .service(routes::user::create)
@@ -53,5 +54,5 @@ async fn main() -> std::io::Result<()> {
     };
 
     // Start the Actix server
-    HttpServer::new(app).bind(("127.0.0.1", 8080))?.run().await
+    HttpServer::new(app).bind(("0.0.0.0", 3000))?.run().await
 }
