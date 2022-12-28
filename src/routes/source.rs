@@ -52,3 +52,30 @@ pub async fn create(
 
     Ok(HttpResponse::Created().json(DataResponse::new("Created source", result)))
 }
+
+#[actix_web::get("/sources/{user_id}")]
+pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpResponse, Error> {
+    // TODO: Validate URL
+
+    let id = crate::routes::parse_id(user_id.to_string())?;
+
+    let user = state
+        .db
+        .collection::<entity::user::User>("users")
+        .find_one(
+            mongodb::bson::doc! {
+                "_id": id
+            },
+            None,
+        )
+        .await
+        .map_err(|e| error::ErrorBadRequest(ErrorResponse::new("Could not query users", e)))?
+        .ok_or_else(|| {
+            error::ErrorNotFound(Response::new(format!(
+                "Could not find user with id {}",
+                user_id
+            )))
+        })?;
+
+    Ok(HttpResponse::Ok().json(DataResponse::new("Found user", user.sources)))
+}
