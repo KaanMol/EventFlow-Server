@@ -1,6 +1,7 @@
 mod calendar;
 mod entity;
 mod errors;
+mod handlers;
 mod routes;
 
 use actix_web::{web::Data, App, HttpResponse, HttpServer, Responder};
