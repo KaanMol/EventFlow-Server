@@ -25,6 +25,7 @@ impl actix_web::error::ResponseError for ResourceError {
         // Determine the status code based on the error
         let status_code = match self {
             ResourceError::NotFoundById(_) => StatusCode::NOT_FOUND,
+            ResourceError::FailedParse(_) => StatusCode::BAD_REQUEST,
             ResourceError::FailedDatabaseConnection => StatusCode::INTERNAL_SERVER_ERROR,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
