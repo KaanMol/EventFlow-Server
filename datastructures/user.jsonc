@@ -1,0 +1,29 @@
+// User datastructure
+{
+    "_id": "",
+    "name": "",
+
+    "sources": [
+        {
+            "name": "",
+            "url": "",
+            "modifiers": [
+                {
+                    "operation": "", // is, is not, contains, does not contain, regex
+                    "field": "", // title, description, color
+                    "value": "", // value used for the comparison
+                    "newValue": "" //The new value
+                }
+            ],
+
+            "filters": [
+                {
+                    "field": "", // title, description
+                    "operator": "", // is, is not, contains, does not contain, regex
+                    "value": "", // value used for the comparison
+                    "calendar_id": "" // the id of the calendar to which the event should be added
+                }
+            ]
+        }
+    ]
+}
