@@ -1,5 +1,7 @@
 use crate::{entity::user::User, AppState};
 
+use super::error::ResourceError;
+
 pub async fn get_user(
     user_id: mongodb::bson::oid::ObjectId,
     state: actix_web::web::Data<AppState>,
@@ -14,8 +16,8 @@ pub async fn get_user(
             None,
         )
         .await
-        .map_err(|e| super::error::ResourceError::FailedDatabaseConnection)?
-        .ok_or_else(|| super::error::ResourceError::NotFoundById(user_id.to_string()))?;
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?
+        .ok_or_else(|| ResourceError::NotFoundById(user_id.to_string()))?;
 
     Ok(user)
 }

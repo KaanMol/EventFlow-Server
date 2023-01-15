@@ -1,25 +1,26 @@
 use crate::{
-    entity::{self, user},
+    entity::{self, user::User},
     handlers::error::ResourceError,
-    routes::{DataResponse, ErrorResponse, Response},
     AppState,
 };
-use actix_web::{
-    error,
-    web::{Data, Json, Path},
-    Error, HttpResponse, Responder,
-};
+use actix_web::web::{Data, Json, Path};
+use mongodb::results::InsertOneResult;
+
+use crate::handlers::response::ApiResponse;
+
+type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateUserBody {
     name: String,
 }
 
+// FIXME: Proper return type instead of InsertOneResult
 #[actix_web::post("/users")]
 pub async fn create(
     state: Data<AppState>,
     body: Json<CreateUserBody>,
-) -> Result<HttpResponse, Error> {
+) -> Response<InsertOneResult> {
     let result = state
         .db
         .collection::<entity::user::User>("users")
@@ -31,54 +32,20 @@ pub async fn create(
             None,
         )
         .await
-        .map_err(|e| error::ErrorBadRequest(ErrorResponse::new("Could not create user", e)))?;
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
-    // let user = state.db.collection::<entity::user::User>("users").g
-    Ok(HttpResponse::Created().json(DataResponse::new("Created user", result.inserted_id)))
+    Ok(ApiResponse::from_data(result))
 }
 
 #[actix_web::get("/users/{user_id}")]
-pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpResponse, Error> {
-    let id = crate::routes::parse_id(user_id.to_string())?;
+pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Response<User> {
+    let id = crate::routes::parse_id(&user_id)?;
 
-    let user = crate::handlers::user::get_user(id, state).await;
-    match user {
-        Ok(user) => Ok(HttpResponse::Ok().json(DataResponse::new("Found user", user))),
-        Err(error) => Ok(error_handler(error)),
-    }
-}
+    let user = crate::handlers::user::get_user(id, state)
+        .await
+        .map_err(|_| ResourceError::NotFoundById(id.to_string()))?;
 
-#[derive(serde::Serialize)]
-struct ApiResponse<T> {
-    success: bool,
-    error: Option<ResponseError>,
-    data: Option<T>,
-}
-#[derive(serde::Serialize)]
-struct ResponseError {
-    code: i32,
-    message: String,
-}
-
-pub fn error_handler(error: crate::handlers::error::ResourceError) -> HttpResponse {
-    match error {
-        ResourceError::NotFoundById(id) => HttpResponse::NotFound().json(ApiResponse::<String> {
-            success: false,
-            data: None,
-            error: Some(ResponseError {
-                code: 404,
-                message: String::from("Requested resource not found"),
-            }),
-        }),
-        _ => HttpResponse::Gone().json(ApiResponse::<String> {
-            success: false,
-            data: None,
-            error: Some(ResponseError {
-                code: 404,
-                message: String::from("idk bruh"),
-            }),
-        }),
-    }
+    Ok(ApiResponse::from_data(user))
 }
 
 // // TODO: Update user
