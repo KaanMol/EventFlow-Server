@@ -1,13 +1,11 @@
-use crate::routes::{parse_id, to_bson, DataResponse, DebugDataResponse, ErrorResponse, Response};
+use crate::handlers::error::ResourceError;
+use crate::handlers::response::ApiResponse;
+use crate::routes::{parse_id, to_bson};
 use crate::{entity, AppState};
-use actix_web::dev::Url;
-use actix_web::{
-    error,
-    web::{Data, Json, Path},
-    Error, HttpResponse,
-};
-use mongodb::bson::oid::ObjectId;
-use uuid::Uuid;
+use actix_web::web::{Data, Json};
+use mongodb::results::UpdateResult;
+
+type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateFilterBody {
@@ -19,11 +17,9 @@ pub struct CreateFilterBody {
     user_id: String,
 }
 
+// FIXME: Proper return type instead of UpdateResult
 #[actix_web::post("/filters")]
-pub async fn create(
-    state: Data<AppState>,
-    body: Json<CreateFilterBody>,
-) -> Result<HttpResponse, Error> {
+pub async fn create(state: Data<AppState>, body: Json<CreateFilterBody>) -> Response<UpdateResult> {
     // TODO: Validate Calendar ID
 
     let id = parse_id(&body.user_id)?;
@@ -45,23 +41,16 @@ pub async fn create(
         }
     };
 
-    // FIXME: The inserted filter does not have an unique identifier, so we cannot delete or filter on it later.
     let result = state
         .db
         .collection::<entity::user::User>("users")
         .update_one(filter, update, None)
         .await
-        .map_err(|e| error::ErrorBadRequest(ErrorResponse::new("Could not create filter", e)))?;
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
     if result.matched_count == 0 {
-        return Err(error::ErrorBadRequest(ErrorResponse::new(
-            "Could not create filter",
-            format!(
-                "Could not find source with URL '{}' for user with ID '{}'",
-                body.url, body.user_id
-            ),
-        )));
+        return Err(ResourceError::FailedDatabaseConnection);
     }
 
-    Ok(HttpResponse::Created().json(DataResponse::new("Created filter", result)))
+    Ok(ApiResponse::from_data(result))
 }

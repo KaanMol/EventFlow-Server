@@ -1,13 +1,12 @@
-use crate::routes::{parse_id, to_bson, DataResponse, DebugDataResponse, ErrorResponse, Response};
+use crate::entity::user::CalendarEventSource;
+use crate::handlers::error::ResourceError;
+use crate::handlers::response::ApiResponse;
+use crate::routes::{parse_id, to_bson};
 use crate::{entity, AppState};
-use actix_web::dev::Url;
-use actix_web::{
-    error,
-    web::{Data, Json, Path},
-    Error, HttpResponse,
-};
-use mongodb::bson::oid::ObjectId;
-use uuid::Uuid;
+use actix_web::web::{Data, Json, Path};
+use mongodb::results::UpdateResult;
+
+type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateSourceBody {
@@ -16,11 +15,9 @@ pub struct CreateSourceBody {
     user_id: String,
 }
 
+// FIXME: Proper return type instead of UpdateResult
 #[actix_web::post("/sources")]
-pub async fn create(
-    state: Data<AppState>,
-    body: Json<CreateSourceBody>,
-) -> Result<HttpResponse, Error> {
+pub async fn create(state: Data<AppState>, body: Json<CreateSourceBody>) -> Response<UpdateResult> {
     // TODO: Validate URL
 
     let id = parse_id(&body.user_id)?;
@@ -41,23 +38,24 @@ pub async fn create(
         }
     };
 
-    // FIXME: The inserted source does not have an unique identifier, so we cannot delete it later.
-    //        We need to add an unique identifier to the source. Perhaps the URL?
     let result = state
         .db
         .collection::<entity::user::User>("users")
         .update_one(filter, update, None)
         .await
-        .map_err(|e| error::ErrorBadRequest(ErrorResponse::new("Could not create source", e)))?;
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
-    Ok(HttpResponse::Created().json(DataResponse::new("Created source", result)))
+    Ok(ApiResponse::from_data(result))
 }
 
 #[actix_web::get("/sources/{user_id}")]
-pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpResponse, Error> {
+pub async fn read(
+    state: Data<AppState>,
+    user_id: Path<String>,
+) -> Response<Vec<CalendarEventSource>> {
     // TODO: Validate URL
 
-    let id = crate::routes::parse_id(user_id.to_string())?;
+    let id = crate::routes::parse_id(&user_id)?;
 
     let user = state
         .db
@@ -69,13 +67,8 @@ pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Result<HttpRe
             None,
         )
         .await
-        .map_err(|e| error::ErrorBadRequest(ErrorResponse::new("Could not query users", e)))?
-        .ok_or_else(|| {
-            error::ErrorNotFound(Response::new(format!(
-                "Could not find user with id {}",
-                user_id
-            )))
-        })?;
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?
+        .ok_or_else(|| ResourceError::NotFoundById(id.to_string()))?;
 
-    Ok(HttpResponse::Ok().json(DataResponse::new("Found user", user.sources)))
+    Ok(ApiResponse::from_data(user.sources))
 }

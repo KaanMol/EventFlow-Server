@@ -1,6 +1,5 @@
 mod calendar;
 mod entity;
-mod errors;
 mod handlers;
 mod routes;
 
