@@ -8,6 +8,7 @@ mod routes;
 mod tests;
 
 use actix_web::{web::Data, App, HttpResponse, HttpServer, Responder};
+use dotenv::dotenv;
 use ns_scraper::{route::Coordinate, route_builder::RouteFinderBuilder};
 
 use mongodb::{options::ClientOptions, Client};
@@ -32,16 +33,12 @@ pub async fn ping(state: Data<AppState>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv().ok();
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
     // Create database connection
-    let client_options =
-        mongodb::options::ClientOptions::parse("mongodb://root:example@localhost:27017")
-            .await
-            .unwrap();
-    let client = mongodb::Client::with_options(client_options).unwrap();
-    let db = client.database("calendarserver");
+    let db = common::database::connect().await;
 
     // Initialise the app state for Actix
     let state = AppState { db };
