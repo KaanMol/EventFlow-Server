@@ -1,4 +1,7 @@
-use crate::{entity::user::User, AppState};
+use crate::{
+    entity::user::{self, User},
+    AppState,
+};
 
 use super::error::ResourceError;
 
@@ -20,4 +23,23 @@ pub async fn get_user(
         .ok_or_else(|| ResourceError::NotFoundById(user_id.to_string()))?;
 
     Ok(user)
+}
+
+pub async fn create_user(
+    user: User,
+    state: actix_web::web::Data<AppState>,
+) -> Result<User, super::error::ResourceError> {
+    let result = state
+        .db
+        .collection::<crate::entity::user::User>("users")
+        .insert_one(&user, None)
+        .await
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
+
+    let id = result
+        .inserted_id
+        .as_object_id()
+        .ok_or_else(|| ResourceError::Unknown)?;
+
+    get_user(id, state).await
 }
