@@ -19,14 +19,13 @@ pub struct CreateFilterBody {
 
 // FIXME: Proper return type instead of UpdateResult
 #[actix_web::post("/filters")]
-pub async fn create(state: Data<AppState>, body: Json<CreateFilterBody>) -> Response<UpdateResult> {
+pub async fn create(
+    state: Data<AppState>,
+    body: Json<CreateFilterBody>,
+) -> Response<entity::user::CalendarEventSourceFilters> {
     // TODO: Validate Calendar ID
 
     let id = parse_id(&body.user_id)?;
-    let filter = mongodb::bson::doc! {
-        "_id": id,
-        "sources.url": body.url.clone(),
-    };
 
     let new_filter = entity::user::CalendarEventSourceFilters {
         field: body.field.clone(),
@@ -35,22 +34,7 @@ pub async fn create(state: Data<AppState>, body: Json<CreateFilterBody>) -> Resp
         calendar_id: body.calendar_id.clone(),
     };
 
-    let update = mongodb::bson::doc! {
-        "$push": {
-            "sources.$.filters": crate::handlers::to_bson(new_filter)
-        }
-    };
-
-    let result = state
-        .db
-        .collection::<entity::user::User>("users")
-        .update_one(filter, update, None)
-        .await
-        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
-
-    if result.matched_count == 0 {
-        return Err(ResourceError::FailedDatabaseConnection);
-    }
-
-    Ok(ApiResponse::from_data(result))
+    Ok(ApiResponse::from_data(
+        crate::handlers::filter::create_filter(id, body.url.clone(), new_filter, state).await?,
+    ))
 }
