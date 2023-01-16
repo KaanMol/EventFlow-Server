@@ -15,12 +15,8 @@ pub struct CreateUserBody {
     name: String,
 }
 
-// FIXME: Proper return type instead of InsertOneResult
 #[actix_web::post("/users")]
-pub async fn create(
-    state: Data<AppState>,
-    body: Json<CreateUserBody>,
-) -> Response<InsertOneResult> {
+pub async fn create(state: Data<AppState>, body: Json<CreateUserBody>) -> Response<User> {
     let result = state
         .db
         .collection::<entity::user::User>("users")
@@ -34,7 +30,13 @@ pub async fn create(
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
-    Ok(ApiResponse::from_data(result))
+    let user_id = crate::routes::parse_id(&result.inserted_id.to_string())?;
+
+    let user = crate::handlers::user::get_user(user_id, state)
+        .await
+        .map_err(|_| ResourceError::NotFoundById(user_id.to_string()))?;
+
+    Ok(ApiResponse::from_data(user))
 }
 
 #[actix_web::get("/users/{user_id}")]
