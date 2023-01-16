@@ -22,6 +22,7 @@ pub async fn create(state: Data<AppState>, body: Json<CreateUserBody>) -> Respon
         .collection::<entity::user::User>("users")
         .insert_one(
             entity::user::User {
+                id: None,
                 name: body.name.clone(),
                 sources: vec![],
             },
