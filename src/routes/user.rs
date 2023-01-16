@@ -30,13 +30,15 @@ pub async fn create(state: Data<AppState>, body: Json<CreateUserBody>) -> Respon
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
-    let user_id = crate::routes::parse_id(&result.inserted_id.to_string())?;
+    if let Some(user_id) = result.inserted_id.as_object_id() {
+        let user = crate::handlers::user::get_user(user_id, state)
+            .await
+            .map_err(|_| ResourceError::NotFoundById(user_id.to_string()))?;
 
-    let user = crate::handlers::user::get_user(user_id, state)
-        .await
-        .map_err(|_| ResourceError::NotFoundById(user_id.to_string()))?;
-
-    Ok(ApiResponse::from_data(user))
+        Ok(ApiResponse::from_data(user))
+    } else {
+        Err(ResourceError::Unknown)
+    }
 }
 
 #[actix_web::get("/users/{user_id}")]
