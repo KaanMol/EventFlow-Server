@@ -19,13 +19,3 @@ where
         Err(e) => format!("{}:#?", e),
     }
 }
-
-fn to_bson<T>(value: T) -> mongodb::bson::Bson
-where
-    T: serde::Serialize,
-{
-    match mongodb::bson::to_bson(&value) {
-        Ok(bson) => bson,
-        Err(e) => mongodb::bson::Bson::String(format!("{}:#?", e)),
-    }
-}

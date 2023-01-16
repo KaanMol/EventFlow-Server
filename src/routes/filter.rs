@@ -1,6 +1,6 @@
 use crate::handlers::error::ResourceError;
 use crate::handlers::response::ApiResponse;
-use crate::routes::{parse_id, to_bson};
+use crate::routes::parse_id;
 use crate::{entity, AppState};
 use actix_web::web::{Data, Json};
 use mongodb::results::UpdateResult;
@@ -37,7 +37,7 @@ pub async fn create(state: Data<AppState>, body: Json<CreateFilterBody>) -> Resp
 
     let update = mongodb::bson::doc! {
         "$push": {
-            "sources.$.filters": to_bson(new_filter)
+            "sources.$.filters": crate::handlers::to_bson(new_filter)
         }
     };
 
