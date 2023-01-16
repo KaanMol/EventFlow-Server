@@ -20,7 +20,7 @@ pub async fn create_source(
         }
     };
 
-    let result = state
+    state
         .db
         .collection::<entity::user::User>("users")
         .update_one(filter, update, None)
