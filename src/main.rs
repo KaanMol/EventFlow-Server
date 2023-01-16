@@ -1,7 +1,11 @@
 mod calendar;
+mod common;
 mod entity;
-mod handlers;
+pub mod handlers;
 mod routes;
+
+#[cfg(test)]
+mod tests;
 
 use actix_web::{web::Data, App, HttpResponse, HttpServer, Responder};
 use ns_scraper::{route::Coordinate, route_builder::RouteFinderBuilder};
@@ -13,7 +17,6 @@ use std::{error::Error, sync::*};
 #[derive(Clone)]
 pub struct AppState {
     pub db: mongodb::Database,
-    pub client: mongodb::Client,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,7 +44,7 @@ async fn main() -> std::io::Result<()> {
     let db = client.database("calendarserver");
 
     // Initialise the app state for Actix
-    let state = AppState { client, db };
+    let state = AppState { db };
 
     // let cors = actix_cors::Cors::default()
     //     .allowed_origin("https://www.rust-lang.org")
