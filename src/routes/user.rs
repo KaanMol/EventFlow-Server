@@ -37,6 +37,17 @@ pub async fn create(
     Ok(ApiResponse::from_data(result))
 }
 
+#[utoipa::path(
+        get,
+        path = "/users/{user_id}",
+        responses(
+            (status = 200, description = "User found succesfully", body = User),
+            (status = 404, description = "User was not found")
+        ),
+        params(
+            ("user_id" = String, Path, description = "User database id to get User for"),
+        )
+    )]
 #[actix_web::get("/users/{user_id}")]
 pub async fn read(state: Data<AppState>, user_id: Path<String>) -> Response<User> {
     let id = crate::routes::parse_id(&user_id)?;

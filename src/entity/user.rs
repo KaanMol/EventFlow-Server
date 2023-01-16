@@ -1,8 +1,9 @@
 use core::fmt;
 
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct User {
     pub name: String,
     pub sources: Vec<CalendarEventSource>,
@@ -14,7 +15,7 @@ impl fmt::Display for User {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CalendarEventSource {
     pub name: String,
     pub url: String,
@@ -28,7 +29,7 @@ impl fmt::Display for CalendarEventSource {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CalendarEventSourceModifier {
     pub operation: String, // TODO: Convert to enum
     pub field: String,     // TODO: Convert to enum
@@ -42,7 +43,7 @@ impl fmt::Display for CalendarEventSourceModifier {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CalendarEventSourceFilters {
     pub field: String,    // TODO: Convert to enum
     pub operator: String, // TODO: Convert to enum

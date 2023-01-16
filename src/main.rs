@@ -1,6 +1,7 @@
 mod calendar;
 mod entity;
 mod handlers;
+mod openapi;
 mod routes;
 
 use actix_web::{web::Data, App, HttpResponse, HttpServer, Responder};
@@ -9,6 +10,8 @@ use ns_scraper::{route::Coordinate, route_builder::RouteFinderBuilder};
 use mongodb::{options::ClientOptions, Client};
 use serde::{Deserialize, Serialize};
 use std::{error::Error, sync::*};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -49,6 +52,8 @@ async fn main() -> std::io::Result<()> {
     //     .allowed_methods(vec!["GET", "POST"])
     //     .max_age(3600);
 
+    let openapi = crate::openapi::api::ApiDoc::openapi();
+
     // Create the Actix app
     let app = move || {
         App::new()
@@ -68,6 +73,9 @@ async fn main() -> std::io::Result<()> {
             .service(routes::source::read)
             .service(routes::filter::create)
             .service(routes::modifiers::create)
+            .service(
+                SwaggerUi::new("/swagger/{_:.*}").url("/api-doc/openapi.json", openapi.clone()),
+            )
         // .service(routes::calendar::create)
         // .service(routes::calendar::read_for_user)
     };
