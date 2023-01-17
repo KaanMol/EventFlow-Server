@@ -1,12 +1,10 @@
+use crate::handlers::response::ApiResponse;
 use crate::{
     entity::{self, user::User},
     handlers::error::ResourceError,
     AppState,
 };
 use actix_web::web::{Data, Json, Path};
-use mongodb::results::InsertOneResult;
-
-use crate::handlers::response::ApiResponse;
 
 type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 
@@ -17,29 +15,17 @@ pub struct CreateUserBody {
 
 #[actix_web::post("/users")]
 pub async fn create(state: Data<AppState>, body: Json<CreateUserBody>) -> Response<User> {
-    let result = state
-        .db
-        .collection::<entity::user::User>("users")
-        .insert_one(
-            entity::user::User {
-                id: None,
-                name: body.name.clone(),
-                sources: vec![],
-            },
-            None,
-        )
-        .await
-        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
+    let user = crate::handlers::user::create_user(
+        entity::user::User {
+            id: None,
+            name: body.name.clone(),
+            sources: vec![],
+        },
+        state,
+    )
+    .await?;
 
-    if let Some(user_id) = result.inserted_id.as_object_id() {
-        let user = crate::handlers::user::get_user(user_id, state)
-            .await
-            .map_err(|_| ResourceError::NotFoundById(user_id.to_string()))?;
-
-        Ok(ApiResponse::from_data(user))
-    } else {
-        Err(ResourceError::Unknown)
-    }
+    Ok(ApiResponse::from_data(user))
 }
 
 #[actix_web::get("/users/{user_id}")]
