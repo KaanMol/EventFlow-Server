@@ -1,5 +1,5 @@
 use crate::{
-    entity::{self, user},
+    entity::{self},
     AppState,
 };
 

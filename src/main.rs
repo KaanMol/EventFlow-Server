@@ -7,27 +7,16 @@ mod routes;
 #[cfg(test)]
 mod tests;
 
-use actix_web::{web::Data, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web::Data, App, HttpServer, Responder};
 use dotenv::dotenv;
-use ns_scraper::{route::Coordinate, route_builder::RouteFinderBuilder};
-
-use mongodb::{options::ClientOptions, Client};
-use serde::{Deserialize, Serialize};
-use std::{error::Error, sync::*};
 
 #[derive(Clone)]
 pub struct AppState {
     pub db: mongodb::Database,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Book {
-    title: String,
-    author: String,
-}
-
 #[actix_web::get("/ping")]
-pub async fn ping(state: Data<AppState>) -> impl Responder {
+pub async fn ping() -> impl Responder {
     "pong"
 }
 

@@ -4,7 +4,6 @@ use crate::handlers::response::ApiResponse;
 use crate::routes::parse_id;
 use crate::{entity, handlers, AppState};
 use actix_web::web::{Data, Json, Path};
-use mongodb::results::UpdateResult;
 
 type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 

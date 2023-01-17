@@ -1,4 +1,4 @@
-use chrono::{format, NaiveDate, NaiveTime};
+use chrono::{NaiveDate, NaiveTime};
 
 use crate::route::{ArrivalDeparture, Coordinate, Route, Step};
 

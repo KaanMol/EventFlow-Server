@@ -1,5 +1,5 @@
 use crate::{
-    entity::user::{self, User},
+    entity::{self},
     AppState,
 };
 
@@ -8,10 +8,10 @@ use super::error::ResourceError;
 pub async fn get_user(
     user_id: mongodb::bson::oid::ObjectId,
     state: actix_web::web::Data<AppState>,
-) -> Result<User, super::error::ResourceError> {
+) -> Result<entity::user::User, super::error::ResourceError> {
     let user = state
         .db
-        .collection::<crate::entity::user::User>("users")
+        .collection::<entity::user::User>("users")
         .find_one(
             mongodb::bson::doc! {
                 "_id": &user_id
@@ -26,9 +26,9 @@ pub async fn get_user(
 }
 
 pub async fn create_user(
-    user: User,
+    user: entity::user::User,
     state: actix_web::web::Data<AppState>,
-) -> Result<User, super::error::ResourceError> {
+) -> Result<entity::user::User, super::error::ResourceError> {
     let result = state
         .db
         .collection::<crate::entity::user::User>("users")

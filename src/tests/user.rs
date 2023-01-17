@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 #[actix_rt::test]
 pub async fn create_user() {
     let state = crate::AppState {
