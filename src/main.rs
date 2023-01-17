@@ -32,12 +32,6 @@ async fn main() -> std::io::Result<()> {
     // Initialise the app state for Actix
     let state = AppState { db };
 
-    // let cors = actix_cors::Cors::default()
-    //     .allowed_origin("https://www.rust-lang.org")
-    //     .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".rust-lang.org"))
-    //     .allowed_methods(vec!["GET", "POST"])
-    //     .max_age(3600);
-
     // Create the Actix app
     let app = move || {
         App::new()
