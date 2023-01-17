@@ -25,7 +25,7 @@ pub async fn create_source(
         .collection::<entity::user::User>("users")
         .update_one(filter, update, None)
         .await
-        .map_err(|_| ResourceError::FailedDatabaseConnection);
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
     Ok(new_source)
 }
