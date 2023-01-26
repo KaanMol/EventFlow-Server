@@ -7,8 +7,13 @@ mod routes;
 #[cfg(test)]
 mod tests;
 
-use actix_web::{web::Data, App, HttpServer, Responder};
+use actix_web::{
+    web::{Data, Json},
+    App, HttpServer, Responder,
+};
 use dotenv::dotenv;
+use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -18,6 +23,31 @@ pub struct AppState {
 #[actix_web::get("/ping")]
 pub async fn ping() -> impl Responder {
     "pong"
+}
+
+#[derive(serde::Deserialize, Clone)]
+pub struct AuthToken {
+    token: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Claims {
+    name: String,
+}
+
+#[actix_web::post("/verify")]
+pub async fn verify(body: Json<AuthToken>) -> impl Responder {
+    let token = decode::<Claims>(
+        &body.token,
+        // TODO: move this to documentation
+        // generate correct pem with:
+        // openssl rsa -pubout -in rsa-private.pem -out rsa-public.pem
+        &DecodingKey::from_rsa_pem(include_bytes!("certs/token.pem")).unwrap(),
+        &Validation::new(Algorithm::RS256),
+    )
+    .unwrap();
+
+    actix_web::web::Json(token.claims)
 }
 
 #[actix_web::main]
@@ -45,12 +75,12 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(state.clone()))
             .service(ping)
             .service(routes::user::create)
-            .service(routes::user::create)
             .service(routes::user::read)
             .service(routes::source::create)
             .service(routes::source::read)
             .service(routes::filter::create)
             .service(routes::modifiers::create)
+            .service(verify)
         // .service(routes::calendar::create)
         // .service(routes::calendar::read_for_user)
     };

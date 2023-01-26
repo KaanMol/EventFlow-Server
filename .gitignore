@@ -3,3 +3,4 @@ calendar.db
 *.sqlite
 *.lock
 .env
+*.pem
