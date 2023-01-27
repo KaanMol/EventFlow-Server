@@ -44,15 +44,18 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Logger::default())
             .app_data(Data::new(state.clone()))
             .service(ping)
-            .service(routes::user::create)
-            .service(routes::user::create)
-            .service(routes::user::read)
-            .service(routes::source::create)
-            .service(routes::source::read)
-            .service(routes::filter::create)
-            .service(routes::modifiers::create)
-        // .service(routes::calendar::create)
-        // .service(routes::calendar::read_for_user)
+            .service(
+                actix_web::web::scope("/users")
+                    .service(routes::user::create)
+                    .service(routes::user::read),
+            )
+            .service(
+                actix_web::web::scope("/sources")
+                    .service(routes::source::create)
+                    .service(routes::source::read),
+            )
+            .service(actix_web::web::scope("/filters").service(routes::filter::create))
+            .service(actix_web::web::scope("/modifiers").service(routes::modifiers::create))
     };
 
     // Start the Actix server

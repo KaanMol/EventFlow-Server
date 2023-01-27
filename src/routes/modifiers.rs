@@ -13,7 +13,7 @@ pub struct CreateModifierBody {
     user_id: String,
 }
 
-#[actix_web::post("/modifiers")]
+#[actix_web::post("/")]
 pub async fn create(
     state: Data<AppState>,
     body: Json<CreateModifierBody>,

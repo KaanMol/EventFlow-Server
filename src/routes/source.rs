@@ -32,7 +32,7 @@ pub async fn create(
     ))
 }
 
-#[actix_web::get("/sources/{user_id}")]
+#[actix_web::get("/{user_id}")]
 pub async fn read(
     state: Data<AppState>,
     user_id: Path<String>,

@@ -1,4 +1,3 @@
-use crate::handlers::error::ResourceError;
 use crate::handlers::response::ApiResponse;
 use crate::routes::parse_id;
 use crate::{entity, AppState};
@@ -15,7 +14,7 @@ pub struct CreateFilterBody {
 }
 
 // FIXME: Proper return type instead of UpdateResult
-#[actix_web::post("/filters")]
+#[actix_web::post("/")]
 pub async fn create(
     state: Data<AppState>,
     body: Json<CreateFilterBody>,
