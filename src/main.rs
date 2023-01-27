@@ -8,9 +8,9 @@ mod routes;
 mod tests;
 
 use actix_web::{
-    web::{Data, Json},
-    App, HttpServer, Responder,
+    dev::ServiceRequest, error::ErrorUnauthorized, web::Data, App, Error, HttpServer, Responder,
 };
+use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
 use dotenv::dotenv;
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
@@ -25,29 +25,33 @@ pub async fn ping() -> impl Responder {
     "pong"
 }
 
-#[derive(serde::Deserialize, Clone)]
-pub struct AuthToken {
-    token: String,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
     name: String,
 }
 
-#[actix_web::post("/verify")]
-pub async fn verify(body: Json<AuthToken>) -> impl Responder {
-    let token = decode::<Claims>(
-        &body.token,
+async fn validator(
+    req: ServiceRequest,
+    credentials: BearerAuth,
+) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    let result = decode::<Claims>(
+        credentials.token(),
         // TODO: move this to documentation
         // generate correct pem with:
         // openssl rsa -pubout -in rsa-private.pem -out rsa-public.pem
         &DecodingKey::from_rsa_pem(include_bytes!("certs/token.pem")).unwrap(),
         &Validation::new(Algorithm::RS256),
     )
-    .unwrap();
+    .map_err(|e| ErrorUnauthorized(e.to_string()));
 
-    actix_web::web::Json(token.claims)
+    match result {
+        Ok(_claims) => {
+            // req.attach(claims.permissions);
+            Ok(req)
+        }
+        // required by `actix-web-httpauth` validator signature
+        Err(e) => Err((e, req)),
+    }
 }
 
 #[actix_web::main]
@@ -64,6 +68,9 @@ async fn main() -> std::io::Result<()> {
 
     // Create the Actix app
     let app = move || {
+        // Initialise the JWT validator middleware
+        let auth = HttpAuthentication::bearer(validator);
+
         App::new()
             .wrap(
                 actix_cors::Cors::default()
@@ -72,6 +79,7 @@ async fn main() -> std::io::Result<()> {
                     .allow_any_header(),
             )
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(auth)
             .app_data(Data::new(state.clone()))
             .service(ping)
             .service(routes::user::create)
@@ -80,7 +88,6 @@ async fn main() -> std::io::Result<()> {
             .service(routes::source::read)
             .service(routes::filter::create)
             .service(routes::modifiers::create)
-            .service(verify)
         // .service(routes::calendar::create)
         // .service(routes::calendar::read_for_user)
     };
