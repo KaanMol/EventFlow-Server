@@ -38,7 +38,7 @@ pub struct UserClaims {
 }
 
 #[actix_web::get("/ping")]
-pub async fn ping(user: ReqData<UserClaims>) -> impl Responder {
+pub async fn ping() -> impl Responder {
     "pong"
 }
 
