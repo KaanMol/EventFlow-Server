@@ -5,8 +5,6 @@ use crate::routes::parse_id;
 use crate::{entity, handlers, AppState};
 use actix_web::web::{Data, Json, Path};
 
-type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
-
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateSourceBody {
     name: String,
@@ -18,7 +16,7 @@ pub struct CreateSourceBody {
 pub async fn create(
     state: Data<AppState>,
     body: Json<CreateSourceBody>,
-) -> Response<CalendarEventSource> {
+) -> crate::common::Response<CalendarEventSource> {
     // TODO: Validate URL
     let id = parse_id(&body.user_id)?;
 
@@ -38,7 +36,7 @@ pub async fn create(
 pub async fn read(
     state: Data<AppState>,
     user_id: Path<String>,
-) -> Response<Vec<CalendarEventSource>> {
+) -> crate::common::Response<Vec<CalendarEventSource>> {
     let id = crate::routes::parse_id(&user_id)?;
 
     let user = crate::handlers::user::get_user(id, state)
