@@ -8,8 +8,10 @@ mod routes;
 mod tests;
 
 use actix_web::{
-    dev::ServiceRequest, error::ErrorUnauthorized, web::Data, App, Error, HttpMessage, HttpServer,
-    Responder,
+    dev::ServiceRequest,
+    error::ErrorUnauthorized,
+    web::{Data, ReqData},
+    App, Error, HttpMessage, HttpServer, Responder,
 };
 use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
 use dotenv::dotenv;
@@ -25,10 +27,18 @@ pub struct AppState {
 pub struct UserClaims {
     name: String,
     cid: String,
+    nickname: String,
+    preferred_username: String,
+    given_name: String,
+    auth_time: i64,
+    iat: i64,
+    exp: i64,
+    sub: String,
+    groups: Vec<String>,
 }
 
 #[actix_web::get("/ping")]
-pub async fn ping() -> impl Responder {
+pub async fn ping(user: ReqData<UserClaims>) -> impl Responder {
     "pong"
 }
 
