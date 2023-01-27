@@ -8,7 +8,8 @@ mod routes;
 mod tests;
 
 use actix_web::{
-    dev::ServiceRequest, error::ErrorUnauthorized, web::Data, App, Error, HttpServer, Responder,
+    dev::ServiceRequest, error::ErrorUnauthorized, web::Data, App, Error, HttpMessage, HttpServer,
+    Responder,
 };
 use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
 use dotenv::dotenv;
@@ -20,21 +21,22 @@ pub struct AppState {
     pub db: mongodb::Database,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserClaims {
+    name: String,
+    cid: String,
+}
+
 #[actix_web::get("/ping")]
 pub async fn ping() -> impl Responder {
     "pong"
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    name: String,
 }
 
 async fn validator(
     req: ServiceRequest,
     credentials: BearerAuth,
 ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
-    let result = decode::<Claims>(
+    let result = decode::<UserClaims>(
         credentials.token(),
         // TODO: move this to documentation
         // generate correct pem with:
@@ -45,8 +47,12 @@ async fn validator(
     .map_err(|e| ErrorUnauthorized(e.to_string()));
 
     match result {
-        Ok(_claims) => {
+        Ok(user_claims) => {
+            // TODO: Implement permissions in Identity Provider to make Authoriation possible
             // req.attach(claims.permissions);
+
+            // Inject user claims in requests
+            req.extensions_mut().insert(user_claims.claims);
             Ok(req)
         }
         // required by `actix-web-httpauth` validator signature
