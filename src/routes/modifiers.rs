@@ -1,10 +1,7 @@
-use crate::handlers::error::ResourceError;
 use crate::handlers::response::ApiResponse;
 use crate::routes::parse_id;
 use crate::{entity, AppState};
 use actix_web::web::{Data, Json};
-
-type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateModifierBody {
@@ -16,11 +13,11 @@ pub struct CreateModifierBody {
     user_id: String,
 }
 
-#[actix_web::post("/modifiers")]
+#[actix_web::post("/")]
 pub async fn create(
     state: Data<AppState>,
     body: Json<CreateModifierBody>,
-) -> Response<entity::user::CalendarEventSourceModifier> {
+) -> crate::common::Response<entity::user::CalendarEventSourceModifier> {
     // TODO: Validate Calendar ID
 
     let id = parse_id(&body.user_id)?;
