@@ -31,27 +31,28 @@ impl RouteFinderBuilder {
     }
 
     pub fn from(mut self, from: Coordinate) -> Self {
-        self.from.insert(from.into());
+        self.from = Some(from);
+        // self.from.insert(from.into());
         self
     }
 
     pub fn to(mut self, to: Coordinate) -> Self {
-        self.to.insert(to.into());
+        self.to = Some(to);
         self
     }
 
     pub fn date(mut self, date: chrono::NaiveDate) -> Self {
-        self.date.insert(date.into());
+        self.date = Some(date);
         self
     }
 
     pub fn arrive_at(mut self, time: chrono::NaiveTime) -> Self {
-        self.time.insert(ArrivalDeparture::ArriveAt(time).into());
+        self.time = Some(ArrivalDeparture::ArriveAt(time));
         self
     }
 
     pub fn depart_at(mut self, time: chrono::NaiveTime) -> Self {
-        self.time.insert(ArrivalDeparture::DepartAt(time).into());
+        self.time = Some(ArrivalDeparture::DepartAt(time));
         self
     }
 
@@ -88,20 +89,24 @@ impl StepBuilder {
         }
     }
 
-    pub fn travel_type(&mut self, travel_type: impl Into<String>) {
-        self.travel_type.insert(travel_type.into());
+    pub fn travel_type(&mut self, travel_type: impl Into<String>) -> &mut Self {
+        self.travel_type = Some(travel_type.into());
+        self
     }
 
-    pub fn location(&mut self, location: impl Into<String>) {
-        self.location.insert(location.into());
+    pub fn location(&mut self, location: impl Into<String>) -> &mut Self {
+        self.location = Some(location.into());
+        self
     }
 
-    pub fn summary(&mut self, summary: impl Into<String>) {
-        self.summary.insert(summary.into());
+    pub fn summary(&mut self, summary: impl Into<String>) -> &mut Self {
+        self.summary = Some(summary.into());
+        self
     }
 
-    pub fn depart_time(&mut self, depart_time: NaiveTime) {
-        self.depart_time.insert(depart_time.into());
+    pub fn depart_time(&mut self, depart_time: NaiveTime) -> &mut Self {
+        self.depart_time = Some(depart_time);
+        self
     }
 
     pub fn build(self) -> Step {
