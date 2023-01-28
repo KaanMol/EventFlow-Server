@@ -8,6 +8,7 @@ pub async fn create_user() {
         crate::entity::user::User {
             id: None,
             name: "John Doe".to_string(),
+            identities: vec!["6975558cf8663dde5c7c534a4241c0bda09e8b8f".to_string()],
             sources: vec![],
         },
         actix_web::web::Data::new(state),
@@ -34,7 +35,7 @@ pub async fn get_user() {
     };
 
     let user = crate::handlers::user::get_user(
-        crate::routes::parse_id(&"63c53s0ee0a74a9e466187037".to_string()).unwrap(),
+        "6975558cf8663dde5c7c534a4241c0bda09e8b8f".to_string(),
         actix_web::web::Data::new(state),
     )
     .await;
