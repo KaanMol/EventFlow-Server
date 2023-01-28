@@ -1,7 +1,6 @@
 use crate::handlers::response::ApiResponse;
-use crate::routes::parse_id;
-use crate::{entity, AppState};
-use actix_web::web::{Data, Json};
+use crate::{entity, AppState, UserClaims};
+use actix_web::web::{Data, Json, ReqData};
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateFilterBody {
@@ -10,18 +9,18 @@ pub struct CreateFilterBody {
     value: String,
     url: String,
     calendar_id: String,
-    user_id: String,
 }
 
 // FIXME: Proper return type instead of UpdateResult
-#[actix_web::post("/")]
+#[actix_web::post("")]
 pub async fn create(
     state: Data<AppState>,
     body: Json<CreateFilterBody>,
+    user_claims: ReqData<UserClaims>,
 ) -> crate::common::Response<entity::user::CalendarEventSourceFilters> {
     // TODO: Validate Calendar ID
 
-    let id = parse_id(&body.user_id)?;
+    let user_identity = user_claims.into_inner().cid;
 
     let new_filter = entity::user::CalendarEventSourceFilters {
         field: body.field.clone(),
@@ -31,6 +30,7 @@ pub async fn create(
     };
 
     Ok(ApiResponse::from_data(
-        crate::handlers::filter::create_filter(id, body.url.clone(), new_filter, state).await?,
+        crate::handlers::filter::create_filter(user_identity, body.url.clone(), new_filter, state)
+            .await?,
     ))
 }
