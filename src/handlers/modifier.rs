@@ -6,13 +6,17 @@ use crate::{
 use super::error::ResourceError;
 
 pub async fn create_modifier(
-    id: mongodb::bson::oid::ObjectId,
+    user_identity: String,
     url: String,
     new_modifier: entity::user::CalendarEventSourceModifier,
     state: actix_web::web::Data<AppState>,
 ) -> Result<entity::user::CalendarEventSourceModifier, super::error::ResourceError> {
     let filter = mongodb::bson::doc! {
-        "_id": id,
+        "identities": {
+            "$elemMatch": {
+                "$in": [user_identity]
+            }
+        },
         "sources.url": url.clone(),
     };
 
