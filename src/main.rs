@@ -8,10 +8,8 @@ mod routes;
 mod tests;
 
 use actix_web::{
-    dev::ServiceRequest,
-    error::ErrorUnauthorized,
-    web::{Data, ReqData},
-    App, Error, HttpMessage, HttpServer, Responder,
+    dev::ServiceRequest, error::ErrorUnauthorized, web::Data, App, Error, HttpMessage, HttpServer,
+    Responder,
 };
 use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
 use dotenv::dotenv;
