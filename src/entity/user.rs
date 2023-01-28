@@ -15,7 +15,7 @@ pub struct User {
 
 impl fmt::Display for User {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }
 
@@ -29,7 +29,7 @@ pub struct CalendarEventSource {
 
 impl fmt::Display for CalendarEventSource {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }
 
@@ -43,7 +43,7 @@ pub struct CalendarEventSourceModifier {
 
 impl fmt::Display for CalendarEventSourceModifier {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }
 
@@ -57,6 +57,6 @@ pub struct CalendarEventSourceFilters {
 
 impl fmt::Display for CalendarEventSourceFilters {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }

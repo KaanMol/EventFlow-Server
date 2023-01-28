@@ -18,7 +18,7 @@ pub struct CalendarEvent {
 
 impl fmt::Display for CalendarEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }
 
@@ -31,7 +31,7 @@ pub struct Repeat {
 
 impl fmt::Display for Repeat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }
 
@@ -45,7 +45,7 @@ pub struct Metadata {
 
 impl fmt::Display for Metadata {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }
 
@@ -61,6 +61,6 @@ pub struct OriginalEvent {
 
 impl fmt::Display for OriginalEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", super::to_json(&self))
+        write!(f, "{}", super::to_json(self))
     }
 }
