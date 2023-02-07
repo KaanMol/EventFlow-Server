@@ -1,5 +1,6 @@
 mod calendar;
 mod common;
+pub mod dto;
 mod entity;
 pub mod handlers;
 mod routes;
@@ -8,13 +9,15 @@ mod routes;
 mod tests;
 
 use actix_web::{
-    dev::ServiceRequest, error::ErrorUnauthorized, web::Data, App, Error, HttpMessage, HttpServer,
-    Responder,
+    dev::ServiceRequest, error::ErrorUnauthorized, get, web::Data, App, Error, HttpMessage,
+    HttpServer, Responder,
 };
 use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
 use dotenv::dotenv;
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
+use utoipa::{openapi, OpenApi};
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -35,7 +38,13 @@ pub struct UserClaims {
     groups: Vec<String>,
 }
 
-#[actix_web::get("/ping")]
+#[utoipa::path(
+	tag = "Calendar Application",
+    responses(
+        (status = 200, description = "pong", body = [String])
+    )
+)]
+#[get("/ping")]
 pub async fn ping() -> impl Responder {
     "pong"
 }
@@ -80,6 +89,20 @@ async fn main() -> std::io::Result<()> {
     // Initialise the app state for Actix
     let state = AppState { db };
 
+    #[derive(OpenApi)]
+    #[openapi(
+        paths(
+    		ping
+        ),
+        tags(
+            (name = "Calendar Application", description = "General API endpoints for the calendar application")
+        )
+    )]
+    struct ApiDoc;
+
+    let mut openapi = ApiDoc::openapi();
+    openapi.merge(routes::user::UserApiDoc::openapi());
+
     // Create the Actix app
     let app = move || {
         // Initialise the JWT validator middleware
@@ -93,21 +116,33 @@ async fn main() -> std::io::Result<()> {
                     .allow_any_header(),
             )
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(auth)
             .app_data(Data::new(state.clone()))
             .service(ping)
             .service(
                 actix_web::web::scope("/users")
+                    .wrap(auth.clone())
                     .service(routes::user::create)
                     .service(routes::user::read),
             )
             .service(
                 actix_web::web::scope("/sources")
+                    .wrap(auth.clone())
                     .service(routes::source::create)
                     .service(routes::source::read),
             )
-            .service(actix_web::web::scope("/filters").service(routes::filter::create))
-            .service(actix_web::web::scope("/modifiers").service(routes::modifiers::create))
+            .service(
+                actix_web::web::scope("/filters")
+                    .wrap(auth.clone())
+                    .service(routes::filter::create),
+            )
+            .service(
+                actix_web::web::scope("/modifiers")
+                    .wrap(auth.clone())
+                    .service(routes::modifiers::create),
+            )
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-doc/openapi.json", openapi.clone()),
+            )
     };
 
     // Start the Actix server
