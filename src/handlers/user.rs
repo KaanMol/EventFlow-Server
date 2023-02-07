@@ -6,7 +6,7 @@ use crate::{
 use super::error::ResourceError;
 
 pub async fn get_user(
-    user_id: mongodb::bson::oid::ObjectId,
+    user_identity: String,
     state: actix_web::web::Data<AppState>,
 ) -> Result<entity::user::User, super::error::ResourceError> {
     let user = state
@@ -14,13 +14,17 @@ pub async fn get_user(
         .collection::<entity::user::User>("users")
         .find_one(
             mongodb::bson::doc! {
-                "_id": &user_id
+                "identities": {
+                    "$elemMatch": {
+                        "$in": [user_identity.clone()]
+                    }
+                }
             },
             None,
         )
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?
-        .ok_or_else(|| ResourceError::NotFoundById(user_id.to_string()))?;
+        .ok_or_else(|| ResourceError::NotFoundById(user_identity))?;
 
     Ok(user)
 }
@@ -29,17 +33,12 @@ pub async fn create_user(
     user: entity::user::User,
     state: actix_web::web::Data<AppState>,
 ) -> Result<entity::user::User, super::error::ResourceError> {
-    let result = state
+    state
         .db
         .collection::<crate::entity::user::User>("users")
         .insert_one(&user, None)
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
-    let id = result
-        .inserted_id
-        .as_object_id()
-        .ok_or_else(|| ResourceError::Unknown)?;
-
-    get_user(id, state).await
+    get_user(user.identities.get(0).unwrap().to_string(), state).await
 }

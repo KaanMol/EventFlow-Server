@@ -7,17 +7,65 @@ mod routes;
 #[cfg(test)]
 mod tests;
 
-use actix_web::{web::Data, App, HttpServer, Responder};
+use actix_web::{
+    dev::ServiceRequest, error::ErrorUnauthorized, web::Data, App, Error, HttpMessage, HttpServer,
+    Responder,
+};
+use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
 use dotenv::dotenv;
+use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone)]
 pub struct AppState {
     pub db: mongodb::Database,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserClaims {
+    name: String,
+    cid: String,
+    nickname: String,
+    preferred_username: String,
+    given_name: String,
+    auth_time: i64,
+    iat: i64,
+    exp: i64,
+    sub: String,
+    groups: Vec<String>,
+}
+
 #[actix_web::get("/ping")]
 pub async fn ping() -> impl Responder {
     "pong"
+}
+
+async fn validator(
+    req: ServiceRequest,
+    credentials: BearerAuth,
+) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    let result = decode::<UserClaims>(
+        credentials.token(),
+        // TODO: move this to documentation
+        // generate correct pem with:
+        // openssl rsa -pubout -in rsa-private.pem -out rsa-public.pem
+        &DecodingKey::from_rsa_pem(include_bytes!("certs/token.pem")).unwrap(),
+        &Validation::new(Algorithm::RS256),
+    )
+    .map_err(|e| ErrorUnauthorized(e.to_string()));
+
+    match result {
+        Ok(user_claims) => {
+            // TODO: Implement permissions in Identity Provider to make Authoriation possible
+            // req.attach(claims.permissions);
+
+            // Inject user claims in requests
+            req.extensions_mut().insert(user_claims.claims);
+            Ok(req)
+        }
+        // required by `actix-web-httpauth` validator signature
+        Err(e) => Err((e, req)),
+    }
 }
 
 #[actix_web::main]
@@ -34,6 +82,9 @@ async fn main() -> std::io::Result<()> {
 
     // Create the Actix app
     let app = move || {
+        // Initialise the JWT validator middleware
+        let auth = HttpAuthentication::bearer(validator);
+
         App::new()
             .wrap(
                 actix_cors::Cors::default()
@@ -42,6 +93,7 @@ async fn main() -> std::io::Result<()> {
                     .allow_any_header(),
             )
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(auth)
             .app_data(Data::new(state.clone()))
             .service(ping)
             .service(

@@ -6,12 +6,16 @@ use crate::{
 use super::error::ResourceError;
 
 pub async fn create_source(
-    id: mongodb::bson::oid::ObjectId,
+    user_identity: String,
     new_source: user::CalendarEventSource,
     state: actix_web::web::Data<AppState>,
 ) -> Result<user::CalendarEventSource, super::error::ResourceError> {
     let filter = mongodb::bson::doc! {
-        "_id": id
+        "identities": {
+            "$elemMatch": {
+                "$in": [user_identity]
+            }
+        }
     };
 
     let update = mongodb::bson::doc! {

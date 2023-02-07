@@ -1,7 +1,6 @@
 use crate::handlers::response::ApiResponse;
-use crate::routes::parse_id;
-use crate::{entity, AppState};
-use actix_web::web::{Data, Json};
+use crate::{entity, AppState, UserClaims};
+use actix_web::web::{Data, Json, ReqData};
 
 #[derive(serde::Deserialize, Clone)]
 pub struct CreateModifierBody {
@@ -10,17 +9,17 @@ pub struct CreateModifierBody {
     value: String,
     new_value: String,
     url: String,
-    user_id: String,
 }
 
-#[actix_web::post("/")]
+#[actix_web::post("")]
 pub async fn create(
     state: Data<AppState>,
     body: Json<CreateModifierBody>,
+    user_claims: ReqData<UserClaims>,
 ) -> crate::common::Response<entity::user::CalendarEventSourceModifier> {
     // TODO: Validate Calendar ID
 
-    let id = parse_id(&body.user_id)?;
+    let user_identity = user_claims.into_inner().cid;
 
     let new_modifier = entity::user::CalendarEventSourceModifier {
         field: body.field.clone(),
@@ -30,7 +29,12 @@ pub async fn create(
     };
 
     Ok(ApiResponse::from_data(
-        crate::handlers::modifier::create_modifier(id, body.url.clone(), new_modifier, state)
-            .await?,
+        crate::handlers::modifier::create_modifier(
+            user_identity,
+            body.url.clone(),
+            new_modifier,
+            state,
+        )
+        .await?,
     ))
 }
