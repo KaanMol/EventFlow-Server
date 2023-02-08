@@ -1,5 +1,5 @@
 use crate::{
-    entity::{self},
+    entities::{self},
     AppState,
 };
 
@@ -8,9 +8,9 @@ use super::error::ResourceError;
 pub async fn create_filter(
     user_identity: String,
     url: String,
-    new_filter: entity::user::CalendarEventSourceFilters,
+    new_filter: entities::user::CalendarEventSourceFilters,
     state: actix_web::web::Data<AppState>,
-) -> Result<entity::user::CalendarEventSourceFilters, super::error::ResourceError> {
+) -> Result<entities::user::CalendarEventSourceFilters, super::error::ResourceError> {
     let filter = mongodb::bson::doc! {
         "identities": {
             "$elemMatch": {
@@ -28,7 +28,7 @@ pub async fn create_filter(
 
     let result = state
         .db
-        .collection::<entity::user::User>("users")
+        .collection::<entities::user::User>("users")
         .update_one(filter, update, None)
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?;

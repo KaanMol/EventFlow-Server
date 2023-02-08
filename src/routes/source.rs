@@ -1,7 +1,7 @@
-use crate::entity::user::CalendarEventSource;
+use crate::entities::user::CalendarEventSource;
 use crate::handlers::error::ResourceError;
 use crate::handlers::response::ApiResponse;
-use crate::{entity, handlers, AppState, UserClaims};
+use crate::{entities, handlers, AppState, UserClaims};
 use actix_web::web::{Data, Json, ReqData};
 
 #[derive(serde::Deserialize, Clone)]
@@ -19,7 +19,7 @@ pub async fn create(
     // TODO: Validate URL
     let id = user_claims.into_inner().cid;
 
-    let new_source = entity::user::CalendarEventSource {
+    let new_source = entities::user::CalendarEventSource {
         name: body.name.clone(),
         url: body.url.clone(),
         filters: vec![],

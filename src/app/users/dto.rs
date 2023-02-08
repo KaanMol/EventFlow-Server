@@ -1,7 +1,6 @@
+use crate::app::event::dto::EventSourceDto;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-
-use super::calendar::EventSourceDto;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct UserDto {
@@ -20,4 +19,9 @@ impl From<crate::entity::user::User> for UserDto {
             sources: user.sources.into_iter().map(|s| s.into()).collect(),
         }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct CreateUserDto {
+    pub name: String,
 }

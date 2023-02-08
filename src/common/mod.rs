@@ -1,11 +1,10 @@
 use crate::handlers::{error::ResourceError, response::ApiResponse};
+pub type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 pub mod database;
 use utoipa::{
-    openapi::security::{ApiKey, ApiKeyValue, HttpAuthScheme, HttpBuilder, SecurityScheme},
+    openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
     Modify,
 };
-
-pub type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 
 pub struct SecurityAddon;
 
