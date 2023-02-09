@@ -1,11 +1,16 @@
+use actix_web::dev::{ServiceFactory, ServiceRequest};
 use actix_web_httpauth::middleware::HttpAuthentication;
+use serde::{Deserialize, Serialize};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod api;
-mod event;
+mod events;
+mod filters;
 mod middleware;
 mod routes;
+mod rules;
+mod sources;
 mod users;
 
 #[derive(Clone)]
@@ -13,10 +18,10 @@ pub struct State {
     pub db: mongodb::Database,
 }
 
-use serde::{Deserialize, Serialize};
+pub type AppState = actix_web::web::Data<State>;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct UserClaims {
+pub struct Claims {
     name: String,
     cid: String,
     nickname: String,
@@ -29,6 +34,8 @@ pub struct UserClaims {
     groups: Vec<String>,
 }
 
+pub type UserClaims = actix_web::web::ReqData<Claims>;
+
 pub async fn start() -> Result<(), std::io::Error> {
     // Create database connection
     let db = crate::common::database::connect().await;
@@ -37,6 +44,10 @@ pub async fn start() -> Result<(), std::io::Error> {
     let state = State { db };
 
     let mut open_api = api::RootApiDoc::openapi();
+    open_api.merge(events::ApiDoc::openapi());
+    open_api.merge(filters::ApiDoc::openapi());
+    open_api.merge(rules::ApiDoc::openapi());
+    open_api.merge(sources::ApiDoc::openapi());
     open_api.merge(users::ApiDoc::openapi());
 
     // Start the Actix server
@@ -51,7 +62,8 @@ pub async fn start() -> Result<(), std::io::Error> {
             .wrap(actix_web::middleware::Logger::default())
             .app_data(actix_web::web::Data::new(state.clone()))
             .service(routes::ping)
-            .service(users::test())
+            .service(users::routes())
+            .service(events::routes())
             // .service(
             // )
             // .service(

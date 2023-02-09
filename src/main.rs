@@ -1,10 +1,8 @@
 mod app;
 // mod calendar;
 mod common;
-// pub mod dto;
 mod entity;
 pub mod handlers;
-// mod routes;
 
 #[cfg(test)]
 mod tests;

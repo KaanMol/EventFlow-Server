@@ -1,4 +1,4 @@
-pub mod calendar_event;
+pub mod event;
 pub mod user;
 
 fn to_json<T>(value: T) -> String

@@ -1,8 +1,8 @@
 pub mod error;
-// pub mod filter;
-// pub mod modifier;
+pub mod filter;
+pub mod modifier;
 pub mod response;
-// pub mod source;
+pub mod source;
 pub mod user;
 
 pub fn to_bson<T>(value: T) -> mongodb::bson::Bson

@@ -5,7 +5,7 @@ pub async fn auth_validator(
     req: ServiceRequest,
     credentials: BearerAuth,
 ) -> Result<ServiceRequest, (actix_web::Error, ServiceRequest)> {
-    let result = jsonwebtoken::decode::<crate::app::UserClaims>(
+    let result = jsonwebtoken::decode::<crate::app::Claims>(
         credentials.token(),
         // TODO: move this to documentation
         // generate correct pem with:

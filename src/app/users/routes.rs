@@ -1,6 +1,13 @@
-use actix_web::{get, post};
+use actix_web::{get, post, web::Json};
 
-use crate::handlers::{error::ResourceError, response::ApiResponse};
+use crate::{
+    app::{
+        users::dto::{CreateUserDto, UserDto},
+        AppState, UserClaims,
+    },
+    common::Response,
+    handlers::{error::ResourceError, response::ApiResponse},
+};
 
 #[utoipa::path(
 	context_path = "/users",
@@ -11,10 +18,7 @@ use crate::handlers::{error::ResourceError, response::ApiResponse};
     )
 )]
 #[get("")]
-async fn read(
-    state: actix_web::web::Data<crate::app::State>,
-    user_claims: actix_web::web::ReqData<crate::app::UserClaims>,
-) -> crate::common::Response<super::dto::UserDto> {
+async fn read(state: AppState, user_claims: UserClaims) -> Response<UserDto> {
     let user_identity = user_claims.into_inner().cid;
 
     let user = crate::handlers::user::get_user(user_identity.clone(), state)
@@ -35,10 +39,10 @@ async fn read(
 )]
 #[post("")]
 async fn create(
-    state: actix_web::web::Data<crate::app::State>,
-    body: actix_web::web::Json<super::dto::CreateUserDto>,
-    user_claims: actix_web::web::ReqData<crate::app::UserClaims>,
-) -> crate::common::Response<super::dto::UserDto> {
+    state: AppState,
+    body: Json<CreateUserDto>,
+    user_claims: UserClaims,
+) -> crate::common::Response<UserDto> {
     let user = crate::handlers::user::create_user(
         crate::entity::user::User {
             id: None,

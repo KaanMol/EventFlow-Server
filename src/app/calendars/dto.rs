@@ -1,14 +1,13 @@
+use crate::app::events::dto::EventSourceDto;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::app::sources::dto::EventsSourceDto;
-
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct UserDto {
+pub struct CalendarDto {
     pub id: String,
     pub name: String,
     pub identities: Vec<String>,
-    pub sources: Vec<EventsSourceDto>,
+    pub sources: Vec<EventSourceDto>,
 }
 
 impl From<crate::entity::user::User> for UserDto {
@@ -23,6 +22,7 @@ impl From<crate::entity::user::User> for UserDto {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct CreateUserDto {
+pub struct CreateCalendarDto {
+    pub id: String,
     pub name: String,
 }

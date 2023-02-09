@@ -3,7 +3,7 @@ use core::fmt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CalendarEvent {
+pub struct Event {
     id: String,
     title: String,
     description: String,
@@ -12,11 +12,11 @@ pub struct CalendarEvent {
     all_day: bool,
     location: String,
     repeat: Repeat,
-    metadata: Metadata,
+    metadata: EventMetadata,
     original_event: OriginalEvent,
 }
 
-impl fmt::Display for CalendarEvent {
+impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", crate::entity::to_json(self))
     }
@@ -36,14 +36,14 @@ impl fmt::Display for Repeat {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Metadata {
+pub struct EventMetadata {
     color: String,
     icon: String,
     tags: Vec<String>,
     travel_time_minutes: u32,
 }
 
-impl fmt::Display for Metadata {
+impl fmt::Display for EventMetadata {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", crate::entity::to_json(self))
     }
