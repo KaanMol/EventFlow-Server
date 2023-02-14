@@ -1,12 +1,10 @@
+use crate::common::SecurityAddon;
+
 use self::{
     dto::CreateEventDto,
     routes::{__path_create, create},
 };
 
-use super::{
-    filters::dto::EventFilterDto, rules::dto::EventRuleDto, sources::dto::EventsSourceDto,
-};
-use crate::common::SecurityAddon;
 use actix_web::{
     body::{BoxBody, EitherBody},
     dev::{ServiceFactory, ServiceRequest, ServiceResponse},
@@ -30,7 +28,7 @@ pub mod routes;
         tags(
             (name = "Events", description = "Events management endpoint")
         ),
-		// modifiers(&SecurityAddon)
+		modifiers(&SecurityAddon)
 	)]
 pub struct ApiDoc;
 
@@ -38,7 +36,7 @@ pub fn routes() -> actix_web::Scope<
     impl ServiceFactory<
         ServiceRequest,
         Config = (),
-        Response = ServiceResponse<BoxBody>,
+        Response = ServiceResponse<EitherBody<BoxBody>>,
         Error = actix_web::Error,
         InitError = (),
     >,
@@ -46,7 +44,5 @@ pub fn routes() -> actix_web::Scope<
     // Initialise the JWT validator middleware
     let auth = HttpAuthentication::bearer(super::middleware::auth_validator);
 
-    actix_web::web::scope("/events")
-        // .wrap(auth)
-        .service(create)
+    actix_web::web::scope("/events").wrap(auth).service(create)
 }

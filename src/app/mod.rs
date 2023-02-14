@@ -1,5 +1,3 @@
-use actix_web::dev::{ServiceFactory, ServiceRequest};
-use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Deserialize, Serialize};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;

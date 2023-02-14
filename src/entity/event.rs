@@ -14,6 +14,7 @@ pub struct EventEntity {
     pub end: String,
     pub all_day: bool,
     pub location: String,
+    pub user_id: String,
     // repeat: Repeat,
     // metadata: EventMetadata,
     // original_event: OriginalEvent,

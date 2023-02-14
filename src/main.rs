@@ -16,5 +16,3 @@ async fn main() -> std::io::Result<()> {
 
     app::start().await
 }
-
-fn test() {}

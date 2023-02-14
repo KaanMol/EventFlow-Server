@@ -20,6 +20,6 @@ pub mod dto;
         tags(
             (name = "EventFilters", description = "Event Filters management endpoint")
         ),
-		// modifiers(&SecurityAddon)
+		modifiers(&SecurityAddon)
 	)]
 pub struct ApiDoc;

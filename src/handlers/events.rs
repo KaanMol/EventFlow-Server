@@ -1,4 +1,4 @@
-use crate::{app::AppState, entity::event};
+use crate::app::AppState;
 
 use super::error::ResourceError;
 

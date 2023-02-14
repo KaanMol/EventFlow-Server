@@ -1,4 +1,4 @@
-use actix_web::{get, post, web::Json};
+use actix_web::{post, web::Json};
 
 use crate::{
     app::{
@@ -6,7 +6,6 @@ use crate::{
         AppState, UserClaims,
     },
     common::Response,
-    entity::event,
     handlers::response::ApiResponse,
 };
 
@@ -20,7 +19,11 @@ use crate::{
     )
 )]
 #[post("")]
-pub async fn create(state: AppState, body: Json<CreateEventDto>) -> Response<EventDto> {
+pub async fn create(
+    state: AppState,
+    body: Json<CreateEventDto>,
+    user_claims: UserClaims,
+) -> Response<EventDto> {
     let new_event = crate::handlers::events::create(
         crate::entity::event::EventEntity {
             id: None,
@@ -28,8 +31,9 @@ pub async fn create(state: AppState, body: Json<CreateEventDto>) -> Response<Eve
             description: body.description.clone(),
             start: body.start.clone(),
             end: body.end.clone(),
-            all_day: body.all_day.clone(),
+            all_day: body.all_day,
             location: body.location.clone(),
+            user_id: user_claims.into_inner().cid,
         },
         state,
     )
