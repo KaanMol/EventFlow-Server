@@ -1,8 +1,10 @@
+use self::{
+    dto::CreateEventDto,
+    routes::{__path_create, create},
+};
+
 use super::{
-    filters::dto::EventFilterDto,
-    rules::dto::EventRuleDto,
-    sources::dto::EventsSourceDto,
-    users::routes::{__path_create, __path_read, create, read},
+    filters::dto::EventFilterDto, rules::dto::EventRuleDto, sources::dto::EventsSourceDto,
 };
 use crate::common::SecurityAddon;
 use actix_web::{
@@ -18,11 +20,11 @@ pub mod routes;
 #[derive(OpenApi)]
 #[openapi(
         paths(
-    		read,
 			create
         ),
 		components(
 			schemas(
+				CreateEventDto
 			)
 		),
         tags(
@@ -46,6 +48,5 @@ pub fn routes() -> actix_web::Scope<
 
     actix_web::web::scope("/events")
         // .wrap(auth)
-        .service(read)
         .service(create)
 }
