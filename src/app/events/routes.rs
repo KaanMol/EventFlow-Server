@@ -1,48 +1,40 @@
-use actix_web::{get, post};
+use actix_web::{get, post, web::Json};
 
 use crate::{
-    app::{AppState, UserClaims},
+    app::{
+        events::dto::{CreateEventDto, EventDto},
+        AppState, UserClaims,
+    },
     common::Response,
+    entity::event,
     handlers::response::ApiResponse,
 };
 
 #[utoipa::path(
 	context_path = "/events",
 	tag = "Events",
+	request_body = CreateEventDto,
     responses(
-        (status = 200, description = "Authenticated user", body = UserDto),
-		(status = 401, description = "Authorization token missing or invalid", body = String)
-    )
-)]
-#[get("")]
-pub async fn read(state: AppState, user_claims: UserClaims) -> Response<String> {
-    // let user_identity = user_claims.into_inner().cid;
-
-    // let user = crate::handlers::user::get_user(user_identity.clone(), state)
-    //     .await
-    //     .map_err(|_| ResourceError::NotFoundById(user_identity))?;
-
-    Ok(ApiResponse::from_data("Hiii".to_string()))
-}
-
-#[utoipa::path(
-	context_path = "/events",
-	tag = "Events",
-    responses(
-        (status = 200, description = "Authenticated user", body = UserDto),
+        (status = 200, description = "Created calendar", body = EventDto),
 		(status = 401, description = "Authorization token missing or invalid", body = String)
     )
 )]
 #[post("")]
-pub async fn create(state: AppState, user_claims: UserClaims) -> Response<String> {
-    // Get the unique user ID from the claims
-    let user_identity = user_claims.into_inner().cid;
-
-    // Retrieve the user from the database
-    let user = crate::handlers::user::get_user(user_identity.clone(), state)
-        .await
-        .map_err(|_| ResourceError::NotFoundById(user_identity))?;
+pub async fn create(state: AppState, body: Json<CreateEventDto>) -> Response<EventDto> {
+    let new_event = crate::handlers::events::create(
+        crate::entity::event::EventEntity {
+            id: None,
+            title: body.title.clone(),
+            description: body.description.clone(),
+            start: body.start.clone(),
+            end: body.end.clone(),
+            all_day: body.all_day.clone(),
+            location: body.location.clone(),
+        },
+        state,
+    )
+    .await?;
 
     // Return the response
-    Ok(ApiResponse::from_data("hi".to_string()))
+    Ok(ApiResponse::from_data(new_event.into()))
 }
