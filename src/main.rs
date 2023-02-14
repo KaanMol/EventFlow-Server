@@ -3,6 +3,7 @@ mod app;
 mod common;
 mod entity;
 pub mod handlers;
+mod utils;
 
 #[cfg(test)]
 mod tests;
