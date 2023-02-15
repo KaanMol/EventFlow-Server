@@ -53,20 +53,13 @@ pub async fn create(
     )
 )]
 #[get("")]
-pub async fn read_all(state: AppState) -> Response<Vec<EventDto>> {
-    println!(
-        "user_claims: {:?}",
-        "6975558cf8663dde5c7c534a4241c0bda09e8b8f"
-    );
-    let raw_events = crate::handlers::events::get_all(
-        "6975558cf8663dde5c7c534a4241c0bda09e8b8f".to_owned(),
-        state,
-    )
-    .await?;
+pub async fn read_all(state: AppState, user_claims: UserClaims) -> Response<Vec<EventDto>> {
+    // Get all the events from the database
+    let raw_events = crate::handlers::events::get_all(user_claims.into_inner().cid, state).await?;
 
-    println!("raw_events: {:?}", raw_events);
-
+    // Convert the raw events into DTOs
     let events: Vec<EventDto> = raw_events.into_iter().map(|event| event.into()).collect();
+
     // Return the response
     Ok(ApiResponse::from_data(events))
 }
