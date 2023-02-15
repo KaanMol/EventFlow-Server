@@ -1,4 +1,4 @@
-use actix_web::{post, web::Json};
+use actix_web::{get, post, web::Json};
 
 use crate::{
     app::{
@@ -41,4 +41,32 @@ pub async fn create(
 
     // Return the response
     Ok(ApiResponse::from_data(new_event.into()))
+}
+
+#[utoipa::path(
+	context_path = "/events",
+	tag = "Events",
+	request_body = CreateEventDto,
+    responses(
+        (status = 200, description = "Array of events", body = [EventDto]),
+		(status = 401, description = "Authorization token missing or invalid", body = String)
+    )
+)]
+#[get("")]
+pub async fn read_all(state: AppState) -> Response<Vec<EventDto>> {
+    println!(
+        "user_claims: {:?}",
+        "6975558cf8663dde5c7c534a4241c0bda09e8b8f"
+    );
+    let raw_events = crate::handlers::events::get_all(
+        "6975558cf8663dde5c7c534a4241c0bda09e8b8f".to_owned(),
+        state,
+    )
+    .await?;
+
+    println!("raw_events: {:?}", raw_events);
+
+    let events: Vec<EventDto> = raw_events.into_iter().map(|event| event.into()).collect();
+    // Return the response
+    Ok(ApiResponse::from_data(events))
 }

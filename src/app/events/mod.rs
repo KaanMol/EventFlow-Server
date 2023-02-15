@@ -1,8 +1,8 @@
 use crate::common::SecurityAddon;
 
 use self::{
-    dto::CreateEventDto,
-    routes::{__path_create, create},
+    dto::{CreateEventDto, EventDto},
+    routes::{__path_create, __path_read_all, create, read_all},
 };
 
 use actix_web::{
@@ -18,11 +18,13 @@ pub mod routes;
 #[derive(OpenApi)]
 #[openapi(
         paths(
-			create
+			create,
+			read_all
         ),
 		components(
 			schemas(
-				CreateEventDto
+				CreateEventDto,
+				EventDto
 			)
 		),
         tags(
@@ -44,5 +46,8 @@ pub fn routes() -> actix_web::Scope<
     // Initialise the JWT validator middleware
     let auth = HttpAuthentication::bearer(super::middleware::auth_validator);
 
-    actix_web::web::scope("/events").wrap(auth).service(create)
+    actix_web::web::scope("/events")
+        .wrap(auth)
+        .service(create)
+        .service(read_all)
 }
