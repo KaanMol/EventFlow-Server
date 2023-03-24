@@ -4,10 +4,8 @@ use utoipa_swagger_ui::SwaggerUi;
 
 mod api;
 mod events;
-mod filters;
 mod middleware;
 mod routes;
-mod rules;
 mod sources;
 mod users;
 
@@ -42,10 +40,8 @@ pub async fn start() -> Result<(), std::io::Error> {
     let state = State { db };
 
     let mut open_api = api::RootApiDoc::openapi();
-    open_api.merge(events::ApiDoc::openapi());
-    open_api.merge(filters::ApiDoc::openapi());
-    open_api.merge(rules::ApiDoc::openapi());
     open_api.merge(sources::ApiDoc::openapi());
+    open_api.merge(events::ApiDoc::openapi());
     open_api.merge(users::ApiDoc::openapi());
 
     // Start the Actix server
@@ -61,6 +57,7 @@ pub async fn start() -> Result<(), std::io::Error> {
             .app_data(actix_web::web::Data::new(state.clone()))
             .service(routes::ping)
             .service(users::routes())
+            .service(sources::routes())
             .service(events::routes())
             // .service(
             // )
