@@ -6,7 +6,7 @@ use crate::{
         AppState, UserClaims,
     },
     common::Response,
-    handlers::response::ApiResponse,
+    handlers::{error::ResourceError, response::ApiResponse},
 };
 
 #[utoipa::path(
@@ -24,13 +24,21 @@ pub async fn create(
     body: Json<CreateEventDto>,
     user_claims: UserClaims,
 ) -> Response<EventDto> {
+    // Parse the dates from the request body
+    let start_date = chrono::DateTime::parse_from_rfc2822(&body.start)
+        .map_err(|_| ResourceError::FailedParse("start date".to_string()))?;
+
+    let end_date = chrono::DateTime::parse_from_rfc2822(&body.end)
+        .map_err(|_| ResourceError::FailedParse("end date".to_string()))?;
+
+    // Create the event in the database
     let new_event = crate::handlers::events::create(
         crate::entity::event::EventEntity {
             id: None,
             title: body.title.clone(),
             description: body.description.clone(),
-            start: body.start.clone(),
-            end: body.end.clone(),
+            start: start_date.with_timezone(&chrono::Utc).clone(),
+            end: end_date.with_timezone(&chrono::Utc).clone(),
             all_day: body.all_day,
             location: body.location.clone(),
             user_id: user_claims.into_inner().cid,
