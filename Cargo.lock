@@ -618,6 +618,7 @@ dependencies = [
  "mongodb",
  "ns_scraper",
  "regex",
+ "reqwest",
  "serde",
  "serde_json",
  "thiserror",
