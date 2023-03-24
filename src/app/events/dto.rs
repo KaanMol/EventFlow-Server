@@ -18,8 +18,8 @@ impl From<crate::entity::event::EventEntity> for EventDto {
             id: event.id.unwrap().to_string(),
             title: event.title,
             description: event.description,
-            start: event.start,
-            end: event.end,
+            start: event.start.to_string(),
+            end: event.end.to_string(),
             all_day: event.all_day,
             location: event.location,
         }
