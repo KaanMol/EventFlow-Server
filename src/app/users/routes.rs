@@ -41,13 +41,13 @@ async fn read(state: AppState, user_claims: UserClaims) -> Response<UserDto> {
 async fn create(
     state: AppState,
     body: Json<CreateUserDto>,
-    user_claims: UserClaims,
+    //user_claims: UserClaims,
 ) -> crate::common::Response<UserDto> {
     let user = crate::handlers::user::create_user(
         crate::entity::user::User {
             id: None,
             name: body.name.clone(),
-            identities: vec![user_claims.into_inner().cid],
+            identities: vec!["je moedfer".to_string()],
             sources: vec![],
         },
         state,

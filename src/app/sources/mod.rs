@@ -32,7 +32,7 @@ pub fn routes() -> actix_web::Scope<
     impl ServiceFactory<
         ServiceRequest,
         Config = (),
-        Response = ServiceResponse<EitherBody<BoxBody>>,
+        Response = ServiceResponse<BoxBody>, // FIXME: change to EitherBody<BoxBody>
         Error = actix_web::Error,
         InitError = (),
     >,
@@ -40,5 +40,6 @@ pub fn routes() -> actix_web::Scope<
     // Initialise the JWT validator middleware
     let auth = HttpAuthentication::bearer(super::middleware::auth_validator);
 
-    actix_web::web::scope("/sources").wrap(auth).service(create)
+    // FIXME: add auth back
+    actix_web::web::scope("/sources").service(create)
 }

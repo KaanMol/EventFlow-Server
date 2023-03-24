@@ -14,6 +14,9 @@ pub enum ResourceError {
     #[error("Could not parse `{0}`")]
     FailedParse(String),
 
+    #[error("Input is invalid: `{0}`")]
+    InvalidInput(String),
+
     #[error("Unknown error")]
     Unknown,
 }
