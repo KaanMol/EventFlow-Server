@@ -28,3 +28,4 @@ jsonwebtoken = "8"
 actix-web-httpauth = "0.8.0"
 utoipa = { version = "3", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
+bson = { version = "2.5.0", features = ["chrono-0_4"] }
