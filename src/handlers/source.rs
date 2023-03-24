@@ -2,9 +2,9 @@ use super::error::ResourceError;
 
 pub async fn create_source(
     user_identity: String,
-    new_source: crate::entity::user::CalendarEventSource,
+    new_source: crate::entity::user::EventSource,
     state: actix_web::web::Data<crate::app::State>,
-) -> Result<crate::entity::user::CalendarEventSource, super::error::ResourceError> {
+) -> Result<crate::entity::user::EventSource, super::error::ResourceError> {
     let filter = mongodb::bson::doc! {
         "identities": {
             "$elemMatch": {
