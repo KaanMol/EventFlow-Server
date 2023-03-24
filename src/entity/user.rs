@@ -10,7 +10,7 @@ pub struct User {
     pub id: Option<mongodb::bson::oid::ObjectId>,
     pub name: String,
     pub identities: Vec<String>,
-    pub sources: Vec<CalendarEventSource>,
+    pub sources: Vec<EventSource>,
 }
 
 impl fmt::Display for User {
@@ -20,12 +20,12 @@ impl fmt::Display for User {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CalendarEventSource {
+pub struct EventSource {
     pub name: String,
     pub url: String,
 }
 
-impl fmt::Display for CalendarEventSourceFilters {
+impl fmt::Display for EventSource {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", super::to_json(self))
     }
