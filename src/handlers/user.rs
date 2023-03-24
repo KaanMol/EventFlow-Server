@@ -1,17 +1,15 @@
-use crate::{
-    entity::{self},
-    AppState,
-};
+// use crate::entities::{self};
 
 use super::error::ResourceError;
 
 pub async fn get_user(
     user_identity: String,
-    state: actix_web::web::Data<AppState>,
-) -> Result<entity::user::User, super::error::ResourceError> {
+    state: actix_web::web::Data<crate::app::State>,
+) -> Result<crate::entity::user::User, super::error::ResourceError> {
+    // TODO: Cargo Clippy complains about ok_or_else() being used instead of ok_or(), this is not something with a high priority to fix, but handy to know.
     let user = state
         .db
-        .collection::<entity::user::User>("users")
+        .collection::<crate::entity::user::User>("users")
         .find_one(
             mongodb::bson::doc! {
                 "identities": {
@@ -30,9 +28,9 @@ pub async fn get_user(
 }
 
 pub async fn create_user(
-    user: entity::user::User,
-    state: actix_web::web::Data<AppState>,
-) -> Result<entity::user::User, super::error::ResourceError> {
+    user: crate::entity::user::User,
+    state: actix_web::web::Data<crate::app::State>,
+) -> Result<crate::entity::user::User, super::error::ResourceError> {
     state
         .db
         .collection::<crate::entity::user::User>("users")

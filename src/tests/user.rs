@@ -1,6 +1,6 @@
 #[actix_rt::test]
 pub async fn create_user() {
-    let state = crate::AppState {
+    let state = crate::app::State {
         db: crate::common::database::connect().await,
     };
 
@@ -30,7 +30,7 @@ pub async fn create_user() {
 
 #[actix_rt::test]
 pub async fn get_user() {
-    let state = crate::AppState {
+    let state = crate::app::State {
         db: crate::common::database::connect().await,
     };
 

@@ -1,5 +1,5 @@
 use crate::handlers::response::ApiResponse;
-use crate::{entity, AppState, UserClaims};
+use crate::{entities, AppState, UserClaims};
 use actix_web::web::{Data, Json, ReqData};
 
 #[derive(serde::Deserialize, Clone)]
@@ -16,12 +16,12 @@ pub async fn create(
     state: Data<AppState>,
     body: Json<CreateModifierBody>,
     user_claims: ReqData<UserClaims>,
-) -> crate::common::Response<entity::user::CalendarEventSourceModifier> {
+) -> crate::common::Response<entities::user::CalendarEventSourceModifier> {
     // TODO: Validate Calendar ID
 
     let user_identity = user_claims.into_inner().cid;
 
-    let new_modifier = entity::user::CalendarEventSourceModifier {
+    let new_modifier = entities::user::CalendarEventSourceModifier {
         field: body.field.clone(),
         value: body.value.clone(),
         new_value: body.new_value.clone(),
