@@ -1,5 +1,6 @@
 use actix_web::{get, post, web::Json};
 
+use crate::handlers::error::ResourceError;
 use crate::handlers::source::create_source;
 
 use crate::{
@@ -27,4 +28,10 @@ pub async fn create(
     .await?;
 
     Ok(ApiResponse::from_data(source.into()))
+}
+
+#[get("/sync")]
+pub async fn sync(state: AppState) -> crate::common::Response<()> {
+    let user = crate::handlers::user::get_user("je moedfer".to_string(), state).await?;
+    todo!()
 }

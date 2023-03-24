@@ -1,6 +1,7 @@
 use crate::handlers::{error::ResourceError, response::ApiResponse};
 pub type Response<T> = std::result::Result<ApiResponse<T>, ResourceError>;
 pub mod database;
+pub mod ical;
 use utoipa::{
     openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
     Modify,
