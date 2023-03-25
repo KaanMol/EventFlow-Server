@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"conventionalCommits.scopes": [
+			"app/events"
+		],
+		"editor.insertSpaces": false,
+		"editor.formatOnSave": true
+	},
+	"extensions": {
+		"recommendations": [
+			"vivaxy.vscode-conventional-commits",
+			"serayuzgur.crates",
+			"tamasfe.even-better-toml",
+			"rust-lang.rust-analyzer",
+			"gruntfuggly.todo-tree"
+		]
+	}
+}
