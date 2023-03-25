@@ -32,6 +32,5 @@ pub async fn create(
 
 #[get("/sync")]
 pub async fn sync(state: AppState) -> crate::common::Response<()> {
-    let user = crate::handlers::user::get_user("je moedfer".to_string(), state).await?;
-    todo!()
+    let result = crate::handlers::source::sync_sources("je moedfer", state).await?;
 }

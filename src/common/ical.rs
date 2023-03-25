@@ -3,7 +3,7 @@ use icalendar::{Calendar, Component};
 use crate::handlers::error::ResourceError;
 
 pub async fn parse_ical_uri(
-    user_id: impl String,
+    user_id: &String,
     ical_uri: impl Into<String>,
 ) -> Result<Vec<crate::entity::event::EventEntity>, ResourceError> {
     // Request source
@@ -112,7 +112,9 @@ impl ToUtc for icalendar::DatePerhapsTime {
         };
 
         // FIXME: the offset should be calculated from the timezone, not be hardcoded to UTC
-        Ok(chrono::DateTime::<chrono::Utc>::from_utc(date, chrono::Utc))
+        let result: Result<chrono::DateTime<chrono::Utc>, ResourceError> =
+            Ok(chrono::DateTime::<chrono::Utc>::from_utc(date, chrono::Utc));
+        result
     }
 }
 
