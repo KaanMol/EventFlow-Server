@@ -3,7 +3,7 @@ use icalendar::{Calendar, Component};
 use crate::handlers::error::ResourceError;
 
 pub async fn parse_ical_uri(
-    user_id: &String,
+    user_id: String,
     ical_uri: impl Into<String>,
 ) -> Result<Vec<crate::entity::event::EventEntity>, ResourceError> {
     // Request source
@@ -48,12 +48,12 @@ async fn parse_ical(
             let start = event
                 .get_start()
                 .ok_or(ResourceError::FailedParse("ical start".to_string()))?
-                .to_utc();
+                .to_utc()?;
 
             let end = event
                 .get_end()
                 .ok_or(ResourceError::FailedParse("ical end".to_string()))?
-                .to_utc();
+                .to_utc()?;
 
             let event = crate::entity::event::EventEntity {
                 id: None,
@@ -72,7 +72,7 @@ async fn parse_ical(
 }
 
 trait ToUtc {
-    fn to_utc(self) -> chrono::DateTime<chrono::Utc>;
+    fn to_utc(self) -> Result<chrono::DateTime<chrono::Utc>, ResourceError>;
 }
 
 impl ToUtc for icalendar::DatePerhapsTime {

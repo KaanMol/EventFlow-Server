@@ -32,5 +32,6 @@ pub async fn create(
 
 #[get("/sync")]
 pub async fn sync(state: AppState) -> crate::common::Response<()> {
-    let result = crate::handlers::source::sync_sources("je moedfer", state).await?;
+    let result = crate::handlers::source::sync_sources("je moedfer".to_string(), state).await?;
+    Ok(ApiResponse::from_data(result))
 }
