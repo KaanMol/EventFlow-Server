@@ -47,7 +47,7 @@ async fn create(
         crate::entity::user::User {
             id: None,
             name: body.name.clone(),
-            identities: vec!["je moedfer".to_string()],
+            identities: vec!["Teddy Debugger".to_string()],
             sources: vec![],
         },
         state,

@@ -18,7 +18,7 @@ pub async fn create(
     // user_claims: UserClaims, TODO: Add user claims
 ) -> crate::common::Response<EventsSourceDto> {
     let source = create_source(
-        "je moedfer".to_string(),
+        "Teddy Debugger".to_string(),
         crate::entity::user::EventSource {
             name: body.name.clone(),
             url: body.url.clone(),
@@ -32,6 +32,6 @@ pub async fn create(
 
 #[get("/sync")]
 pub async fn sync(state: AppState) -> crate::common::Response<()> {
-    let result = crate::handlers::source::sync_sources("je moedfer".to_string(), state).await?;
+    let result = crate::handlers::source::sync_sources("Teddy Debugger".to_string(), state).await?;
     Ok(ApiResponse::from_data(result))
 }
