@@ -33,6 +33,7 @@ impl actix_web::error::ResponseError for ResourceError {
             ResourceError::NotFoundById(_) => StatusCode::NOT_FOUND,
             ResourceError::FailedParse(_) => StatusCode::BAD_REQUEST,
             ResourceError::FailedDatabaseConnection => StatusCode::INTERNAL_SERVER_ERROR,
+            ResourceError::InvalidInput(_) => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
 
