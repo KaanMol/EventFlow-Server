@@ -4,12 +4,12 @@ use crate::handlers::error::ResourceError;
 
 pub async fn parse_ical_uri(
     user_id: String,
-    ical_uri: impl Into<String>,
+    ical_uri: String,
 ) -> Result<Vec<crate::entity::event::EventEntity>, ResourceError> {
     // Request source
     let client = reqwest::Client::new();
     let ical_body = client
-        .get(&ical_uri.into())
+        .get(&ical_uri.clone())
         .send()
         .await
         .map_err(|e| ResourceError::NetworkError)?
@@ -28,47 +28,52 @@ async fn parse_ical(
 ) -> Result<Vec<crate::entity::event::EventEntity>, ResourceError> {
     let calendar = ical
         .parse::<icalendar::Calendar>()
-        .map_err(|e| ResourceError::FailedParse("ical body".to_string()))?;
+        .map_err(|e| ResourceError::FailedParse("calendar body".to_string()))?;
 
-    calendar
-        .iter()
-        .map(|component| {
-            let event = component
-                .as_event()
-                .ok_or(ResourceError::FailedParse("ical body".to_string()))?;
+    let mut result = Vec::new();
 
-            let title = event
-                .get_summary()
-                .ok_or(ResourceError::FailedParse("ical summary".to_string()))?;
+    for component in calendar.iter() {
+        let event = match component.as_event() {
+            Some(event) => event,
+            None => continue,
+        };
 
-            let description = event
-                .get_description()
-                .ok_or(ResourceError::FailedParse("ical description".to_string()))?;
+        let title = event.get_summary().ok_or(ResourceError::FailedParse(
+            "event title is empty".to_string(),
+        ))?;
 
-            let start = event
-                .get_start()
-                .ok_or(ResourceError::FailedParse("ical start".to_string()))?
-                .to_utc()?;
+        let description = match event.get_description() {
+            Some(description) => description,
+            None => "",
+        };
 
-            let end = event
-                .get_end()
-                .ok_or(ResourceError::FailedParse("ical end".to_string()))?
-                .to_utc()?;
+        let start = event
+            .get_start()
+            .ok_or(ResourceError::FailedParse(
+                "event start is empty".to_string(),
+            ))?
+            .to_utc()?;
 
-            let event = crate::entity::event::EventEntity {
-                id: None,
-                user_id: user_id.to_string(),
-                title: title.to_string(),
-                description: description.to_string(),
-                start: start,
-                end: end,
-                all_day: start - end == chrono::Duration::min_value(),
-                location: "idk waar jouw huis woont".to_string(),
-            };
+        let end = event
+            .get_end()
+            .ok_or(ResourceError::FailedParse("event end is empty".to_string()))?
+            .to_utc()?;
 
-            Ok(event)
-        })
-        .collect::<Result<Vec<crate::entity::event::EventEntity>, ResourceError>>()
+        let event = crate::entity::event::EventEntity {
+            id: None,
+            user_id: user_id.to_string(),
+            title: title.to_string(),
+            description: description.to_string(),
+            start: start,
+            end: end,
+            all_day: start - end == chrono::Duration::min_value(),
+            location: "".to_string(),
+        };
+
+        result.push(event);
+    }
+
+    Ok(result)
 }
 
 trait ToUtc {
