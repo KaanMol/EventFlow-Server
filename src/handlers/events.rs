@@ -19,6 +19,27 @@ pub async fn create(
     get_one(new_event.inserted_id.as_object_id().unwrap(), state).await
 }
 
+pub async fn exists_by_original(
+    identity: String,
+    original_id: String,
+    state: AppState,
+) -> Result<bool, super::error::ResourceError> {
+    // Filter on user and original id
+    let filter = mongodb::bson::doc! {
+        "user_id": identity,
+        "original": original_id
+    };
+
+    let count = state
+        .db
+        .collection::<crate::entity::event::EventEntity>("events")
+        .count_documents(filter, None)
+        .await
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
+
+    Ok(count > 0)
+}
+
 pub async fn get_one(
     event_id: mongodb::bson::oid::ObjectId,
     state: actix_web::web::Data<crate::app::State>,

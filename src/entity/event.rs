@@ -17,6 +17,7 @@ pub struct EventEntity {
     pub end: chrono::DateTime<chrono::Utc>,
     pub all_day: bool,
     pub location: String,
+    pub original: Option<String>,
 }
 
 impl fmt::Display for EventEntity {

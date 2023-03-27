@@ -59,6 +59,10 @@ async fn parse_ical(
             .ok_or(ResourceError::FailedParse("event end is empty".to_string()))?
             .to_utc()?;
 
+        let id = event
+            .get_uid()
+            .ok_or(ResourceError::FailedParse("event id is empty".to_string()))?;
+
         let event = crate::entity::event::EventEntity {
             id: None,
             user_id: user_id.to_string(),
@@ -68,6 +72,7 @@ async fn parse_ical(
             end: end,
             all_day: start - end == chrono::Duration::min_value(),
             location: "".to_string(),
+            original: Some(id.to_string()),
         };
 
         result.push(event);
