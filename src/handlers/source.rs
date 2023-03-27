@@ -15,9 +15,7 @@ pub async fn create_source(
 
     let url_regex = regex::Regex::new(r"^(https?|webcals)://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)").unwrap();
     if !url_regex.is_match(&new_source.url) {
-        return Err(ResourceError::InvalidInput(
-            "Url is in an invalid format".to_string(),
-        ));
+        return Err(ResourceError::InvalidInput("url".to_string()));
     }
 
     let filter = mongodb::bson::doc! {
