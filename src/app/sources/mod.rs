@@ -41,5 +41,7 @@ pub fn routes() -> actix_web::Scope<
     let auth = HttpAuthentication::bearer(super::middleware::auth_validator);
 
     // FIXME: add auth back
-    actix_web::web::scope("/sources").service(create)
+    actix_web::web::scope("/sources")
+        .service(routes::create)
+        .service(routes::sync)
 }
