@@ -12,11 +12,7 @@ pub async fn get_user(
         .collection::<crate::entity::user::User>("users")
         .find_one(
             mongodb::bson::doc! {
-                "identities": {
-                    "$elemMatch": {
-                        "$in": [user_identity.clone()]
-                    }
-                }
+                "auth_id": user_identity.clone()
             },
             None,
         )
@@ -38,5 +34,5 @@ pub async fn create_user(
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
-    get_user(user.identities.get(0).unwrap().to_string(), state).await
+    get_user(user.auth_id, state).await
 }
