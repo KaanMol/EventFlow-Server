@@ -15,7 +15,7 @@ pub async fn parse_ical_uri(
         .map_err(|e| ResourceError::NetworkError)?
         .text()
         .await
-        .map_err(|e| ResourceError::FailedParse("Failed to read source response".to_string()))?;
+        .map_err(|e| ResourceError::FailedParse("response body".to_string()))?;
 
     let events = parse_ical(user_id, ical_body).await?;
 
