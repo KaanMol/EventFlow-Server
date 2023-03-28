@@ -2,7 +2,7 @@ use core::fmt;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct EventEntity {
     // FIXME: The ID in the user object is formatted wrong.
     // Currently id is an object which looks like: "_id": { "$oid": "63c530ee0a74a9e466187037" }
@@ -17,6 +17,7 @@ pub struct EventEntity {
     pub end: chrono::DateTime<chrono::Utc>,
     pub all_day: bool,
     pub location: String,
+    pub event_uid: Option<String>,
 }
 
 impl fmt::Display for EventEntity {

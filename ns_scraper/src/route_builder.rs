@@ -71,7 +71,7 @@ impl RouteFinderBuilder {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct StepBuilder {
     travel_type: Option<String>,
     location: Option<String>,

@@ -1,13 +1,13 @@
 // use icalendar::{Component, DatePerhapsTime, EventLike};
 // use regex::Regex;
 
-// #[derive(Debug, Clone)]
+// #[derive(Clone)]
 // pub struct DateTime {
 //     pub date: chrono::NaiveDateTime,
 //     pub timezone: chrono_tz::Tz,
 // }
 
-// #[derive(Debug, Clone)]
+// #[derive(Clone)]
 // pub struct CalendarEvent {
 //     pub name: String,
 //     pub start_date: DateTime,

@@ -27,12 +27,12 @@ use crate::common::SecurityAddon;
 	)]
 pub struct ApiDoc;
 
-pub fn routes() -> actix_web::Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = actix_web::Error, InitError = ()>> {
+pub fn routes() -> actix_web::Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<BoxBody>, Error = actix_web::Error, InitError = ()>> {
 	// Initialise the JWT validator middleware
 	let auth = HttpAuthentication::bearer(super::middleware::auth_validator);
 
 	actix_web::web::scope("/users")
-	.wrap(auth)
+	//.wrap(auth)
 	.service(read)
 	.service(create)
 }
