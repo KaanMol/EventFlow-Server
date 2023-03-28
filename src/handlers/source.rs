@@ -46,21 +46,20 @@ pub async fn create_source(
 }
 
 pub async fn sync_sources(
-    user_identity: String,
+    user_id: String,
     state: actix_web::web::Data<crate::app::State>,
 ) -> Result<(), super::error::ResourceError> {
-    let user = crate::handlers::user::get_user(user_identity.clone(), state.clone())
+    let user = crate::handlers::user::get_user(user_id.clone(), state.clone())
         .await
-        .map_err(|_| ResourceError::NotFoundById(user_identity.clone()))?;
+        .map_err(|_| ResourceError::NotFoundById(user_id.clone()))?;
 
     for source in user.sources {
-        let events = crate::common::ical::parse_ical_uri(user_identity.clone(), source.url).await?;
 
         // FIXME: This should be done in a batch, not one by one.
         for event in events {
             if event.original.is_some() {
                 let exists = crate::handlers::events::exists_by_original(
-                    user_identity.clone(),
+                    user_id.clone(),
                     event.original.clone().unwrap(),
                     state.clone(),
                 )
