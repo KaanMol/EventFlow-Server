@@ -7,8 +7,6 @@ pub async fn create(
     event: crate::entity::event::EventEntity,
     state: AppState,
 ) -> Result<crate::entity::event::EventEntity, super::error::ResourceError> {
-    println!("create event: {:?}", event);
-
     let new_event = state
         .db
         .collection::<crate::entity::event::EventEntity>("events")

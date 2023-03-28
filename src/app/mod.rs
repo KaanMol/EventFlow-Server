@@ -16,7 +16,7 @@ pub struct State {
 
 pub type AppState = actix_web::web::Data<State>;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Claims {
     name: String,
     cid: String,

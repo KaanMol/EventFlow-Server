@@ -1,6 +1,5 @@
 use chrono::{NaiveDate, NaiveTime};
 
-#[derive(Debug)]
 pub struct Coordinate {
     pub lat: f64,
     pub lon: f64,
@@ -18,13 +17,12 @@ impl Coordinate {
     }
 }
 
-#[derive(Debug)]
 pub enum ArrivalDeparture {
     ArriveAt(NaiveTime),
     DepartAt(NaiveTime),
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Step {
     pub travel_type: String,
     pub location: String,
@@ -32,7 +30,6 @@ pub struct Step {
     pub depart_time: NaiveTime,
 }
 
-#[derive(Debug)]
 pub struct Route {
     pub from: Coordinate,
     pub to: Coordinate,

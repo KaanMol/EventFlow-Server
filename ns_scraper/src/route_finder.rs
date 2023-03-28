@@ -2,7 +2,6 @@ use chrono::{NaiveDate, NaiveTime};
 
 use crate::route::{ArrivalDeparture, Coordinate, Route, Step};
 
-#[derive(Debug)]
 pub struct RouteFinder {
     pub from: Coordinate,
     pub to: Coordinate,

@@ -3,7 +3,7 @@ use utoipa::ToSchema;
 
 use crate::app::sources::dto::EventsSourceDto;
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct UserDto {
     pub id: String,
     pub name: String,
@@ -22,7 +22,7 @@ impl From<crate::entity::user::User> for UserDto {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct CreateUserDto {
     pub name: String,
 }

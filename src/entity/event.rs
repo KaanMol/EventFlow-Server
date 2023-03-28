@@ -2,7 +2,7 @@ use core::fmt;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct EventEntity {
     // FIXME: The ID in the user object is formatted wrong.
     // Currently id is an object which looks like: "_id": { "$oid": "63c530ee0a74a9e466187037" }
