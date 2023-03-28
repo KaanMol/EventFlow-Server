@@ -42,7 +42,7 @@ pub async fn create(
             all_day: body.all_day,
             location: body.location.clone(),
             user_id: user_claims.into_inner().cid,
-            original: None,
+            event_uid: None,
         },
         state,
     )

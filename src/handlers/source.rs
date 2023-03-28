@@ -59,10 +59,10 @@ pub async fn sync_sources(
 
         // FIXME: This should be done in a batch, not one by one.
         for event in events {
-            if event.original.is_some() {
+            if event.event_uid.is_some() {
                 let exists = crate::handlers::events::exists_by_original(
                     user_id.clone(),
-                    event.original.clone().unwrap(),
+                    event.event_uid.clone().unwrap(),
                     state.clone(),
                 )
                 .await?;

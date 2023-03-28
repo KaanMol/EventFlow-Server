@@ -74,7 +74,7 @@ async fn parse_ical(
             end: end,
             all_day: start - end == chrono::Duration::min_value(),
             location: location.to_string(),
-            original: Some(id.to_string()),
+            event_uid: Some(id.to_string()),
         };
 
         result.push(event);
