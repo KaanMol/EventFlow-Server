@@ -15,10 +15,10 @@ use crate::{
 pub async fn create(
     state: AppState,
     body: Json<CreateEventSourceDto>,
-    // user_claims: UserClaims, TODO: Add user claims
+    user_claims: UserClaims,
 ) -> crate::common::Response<EventsSourceDto> {
     let source = create_source(
-        "Teddy Debugger".to_string(),
+        "Teddy Debugger".to_string(), // TODO: Use the user ID
         crate::entity::user::EventSource {
             name: body.name.clone(),
             url: body.url.clone(),
@@ -31,7 +31,11 @@ pub async fn create(
 }
 
 #[get("/sync")]
-pub async fn sync(state: AppState) -> crate::common::Response<()> {
-    let result = crate::handlers::source::sync_sources("Teddy Debugger".to_string(), state).await?;
+pub async fn sync(state: AppState, user_claims: UserClaims) -> crate::common::Response<()> {
+    let result = crate::handlers::source::sync_sources(
+        "Teddy Debugger".to_string(), //TODO: Use the user ID
+        state,
+    )
+    .await?;
     Ok(ApiResponse::from_data(result))
 }
