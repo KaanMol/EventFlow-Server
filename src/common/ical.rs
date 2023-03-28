@@ -2,7 +2,7 @@ use icalendar::{Calendar, Component};
 
 use crate::handlers::error::ResourceError;
 
-pub async fn parse_ical_uri(
+pub async fn fetch_and_parse_ical_events(
     user_id: String,
     ical_uri: String,
 ) -> Result<Vec<crate::entity::event::EventEntity>, ResourceError> {

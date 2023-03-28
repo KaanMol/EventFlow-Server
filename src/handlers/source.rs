@@ -54,6 +54,8 @@ pub async fn sync_sources(
         .map_err(|_| ResourceError::NotFoundById(user_id.clone()))?;
 
     for source in user.sources {
+        let events =
+            crate::common::ical::fetch_and_parse_ical_events(user_id.clone(), source.url).await?;
 
         // FIXME: This should be done in a batch, not one by one.
         for event in events {
