@@ -10,7 +10,6 @@ pub struct EventDto {
     pub end: String,
     pub all_day: bool,
     pub location: String,
-    pub original: Option<String>,
 }
 
 impl From<crate::entity::event::EventEntity> for EventDto {
@@ -23,7 +22,6 @@ impl From<crate::entity::event::EventEntity> for EventDto {
             end: event.end.to_string(),
             all_day: event.all_day,
             location: event.location,
-            original: event.original,
         }
     }
 }
