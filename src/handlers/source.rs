@@ -13,7 +13,8 @@ pub async fn create_source(
         return Err(ResourceError::InvalidInput("Url is empty".to_string()));
     }
 
-    let url_regex = regex::Regex::new(r"^(https?|webcals)://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)").unwrap();
+    let regex_source = r"^(https?|webcals)://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)";
+    let url_regex = regex::Regex::new(regex_source).unwrap();
     if !url_regex.is_match(&new_source.url) {
         return Err(ResourceError::InvalidInput("url".to_string()));
     }
