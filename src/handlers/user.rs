@@ -5,7 +5,7 @@ use crate::entity;
 use super::error::ResourceError;
 
 pub async fn get_user(
-    user_identity: String,
+    auth_id: String,
     state: actix_web::web::Data<crate::app::State>,
 ) -> Result<crate::entity::user::User, super::error::ResourceError> {
     // TODO: Cargo Clippy complains about ok_or_else() being used instead of ok_or(), this is not something with a high priority to fix, but handy to know.
@@ -14,13 +14,13 @@ pub async fn get_user(
         .collection::<crate::entity::user::User>("users")
         .find_one(
             mongodb::bson::doc! {
-                "auth_id": user_identity.clone()
+                "auth_id": auth_id.clone()
             },
             None,
         )
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?
-        .ok_or_else(|| ResourceError::NotFoundById(user_identity))?;
+        .ok_or_else(|| ResourceError::NotFoundById(auth_id))?;
 
     Ok(user)
 }
