@@ -2,7 +2,7 @@ use core::fmt;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct User {
     // FIXME: The ID in the user object is formatted wrong.
     // Currently id is an object which looks like: "_id": { "$oid": "63c530ee0a74a9e466187037" }
@@ -19,7 +19,7 @@ impl fmt::Display for User {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct EventSource {
     pub name: String,
     pub url: String,
