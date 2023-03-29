@@ -1,13 +1,12 @@
 use crate::{app, common};
 
 pub mod data;
-mod events;
-mod users;
+mod handlers;
 
 pub async fn setup() -> app::State {
     dotenv::dotenv().ok();
 
     app::State {
-        db: common::database::connect().await,
+        db: common::database::connect_testdb().await,
     }
 }
