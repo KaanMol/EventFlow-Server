@@ -16,6 +16,15 @@ impl From<crate::entity::user::EventSource> for EventsSourceDto {
     }
 }
 
+impl From<EventsSourceDto> for crate::entity::user::EventSource {
+    fn from(event_source: EventsSourceDto) -> Self {
+        crate::entity::user::EventSource {
+            name: event_source.name,
+            url: event_source.url,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CreateEventSourceDto {
     pub name: String,
