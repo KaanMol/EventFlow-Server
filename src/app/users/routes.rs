@@ -1,4 +1,4 @@
-use actix_web::{get, post, web::Json};
+use actix_web::{get, post, put, web::Json};
 
 use crate::{
     app::{
@@ -6,8 +6,11 @@ use crate::{
         AppState, UserClaims,
     },
     common::Response,
-    handlers::{error::ResourceError, response::ApiResponse},
+    entity,
+    handlers::{self, error::ResourceError, response::ApiResponse},
 };
+
+use super::dto::UpdateUserDto;
 
 #[utoipa::path(
 	context_path = "/users",
@@ -55,4 +58,27 @@ async fn create(
     .await?;
 
     Ok(ApiResponse::from_data(user.into()))
+}
+
+#[put("")]
+async fn update(
+    state: AppState,
+    body: Json<UpdateUserDto>,
+    user_claims: UserClaims,
+) -> crate::common::Response<UserDto> {
+    let original_user =
+        handlers::user::get_user(user_claims.cid.to_string(), state.clone()).await?;
+
+    let updated_user = entity::user::User {
+        id: None,
+        name: body.name.clone().unwrap_or(original_user.name),
+        auth_id: user_claims.into_inner().cid,
+        sources: match body.sources.clone() {
+            Some(sources) => sources.into_iter().map(|s| s.into()).collect(),
+            None => original_user.sources,
+        },
+    };
+
+    let updated_user = handlers::user::update_user(updated_user, state).await?;
+    Ok(ApiResponse::from_data(updated_user.into()))
 }
