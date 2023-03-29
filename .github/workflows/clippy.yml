@@ -1,0 +1,28 @@
+on: push
+name: Clippy check
+
+env:
+    RUSTFLAGS: "-Dwarnings"
+
+jobs:
+    clippy_check:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout codebase
+              uses: actions/checkout@v3
+
+            - name: Install Rust toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: stable
+                  override: true
+                  components: rustfmt, clippy
+
+            - name: Cache
+              uses: Swatinem/rust-cache@v2
+
+            - name: Test
+              run: cargo test
+
+            - name: Run Clippy
+              run: cargo clippy --all-targets --all-features -- -D warnings -Z macro-backtrace
