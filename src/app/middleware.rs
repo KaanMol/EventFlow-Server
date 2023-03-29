@@ -25,7 +25,7 @@ pub async fn auth_validator(
         base64::engine::general_purpose::NO_PAD,
     );
 
-    let decoded_bytes = &base64_engine.decode(&env_bytes_base64).unwrap();
+    let decoded_bytes = &base64_engine.decode(env_bytes_base64).unwrap();
 
     let key = &jsonwebtoken::DecodingKey::from_rsa_pem(decoded_bytes).unwrap();
 
