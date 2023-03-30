@@ -3,6 +3,7 @@ name: rust
 
 env:
     RUSTFLAGS: "-Dwarnings"
+    DATABASE_URL: mongodb://root:example@localhost:27019
 
 jobs:
     ci:
@@ -21,8 +22,14 @@ jobs:
             - name: cache
               uses: Swatinem/rust-cache@v2
 
-            - name: test
-              run: cargo test
-
             - name: clippy
               run: cargo clippy --all-targets --all-features -- -D warnings
+
+            - name: start database
+              uses: supercharge/mongodb-github-action@1.9.0
+              with:
+                  mongodb-version: "6.0"
+                  mongodb-port: 27019
+
+            - name: test
+              run: cargo test
