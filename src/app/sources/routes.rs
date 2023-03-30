@@ -29,6 +29,6 @@ pub async fn create(
 
 #[get("/sync")]
 pub async fn sync(state: AppState, user_claims: UserClaims) -> crate::common::Response<()> {
-    let result = handlers::source::sync_sources(user_claims.into_inner().cid, state).await?;
-    Ok(ApiResponse::from_data(result))
+    handlers::source::sync_sources(user_claims.into_inner().cid, state).await?;
+    Ok(ApiResponse::from_data(()))
 }
