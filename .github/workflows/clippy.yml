@@ -8,7 +8,6 @@ on:
 name: Rust
 
 env:
-    RUSTFLAGS: "-Dwarnings"
     DATABASE_URL: mongodb://root:example@localhost:27019
 
 jobs:
