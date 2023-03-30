@@ -17,6 +17,9 @@ pub enum ResourceError {
     #[error("Input is invalid: `{0}`")]
     InvalidInput(String),
 
+    #[error("Not authorized")]
+    AuthorizationError,
+
     #[error("Network failed")]
     NetworkError,
 

@@ -86,3 +86,22 @@ pub async fn get_all(
 
     Ok(results)
 }
+
+pub async fn delete(
+    event_id: mongodb::bson::oid::ObjectId,
+    state: actix_web::web::Data<crate::app::State>,
+) -> Result<(), super::error::ResourceError> {
+    state
+        .db
+        .collection::<crate::entity::event::EventEntity>("events")
+        .delete_one(
+            mongodb::bson::doc! {
+                "_id": event_id
+            },
+            None,
+        )
+        .await
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
+
+    Ok(())
+}
