@@ -6,11 +6,7 @@ pub async fn create_source(
     state: actix_web::web::Data<crate::app::State>,
 ) -> Result<crate::entity::user::EventSource, super::error::ResourceError> {
     if new_source.name.len() == 0 {
-        return Err(ResourceError::InvalidInput("Name is empty".to_string()));
-    }
-
-    if new_source.url.len() == 0 {
-        return Err(ResourceError::InvalidInput("Url is empty".to_string()));
+        return Err(ResourceError::InvalidInput("name".to_string()));
     }
 
     let regex_source = r"^(https?|webcals)://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)";
@@ -20,11 +16,7 @@ pub async fn create_source(
     }
 
     let filter = mongodb::bson::doc! {
-        "identities": {
-            "$elemMatch": {
-                "$in": [user_identity]
-            }
-        }
+        "auth_id": user_identity
     };
 
     let update = mongodb::bson::doc! {
