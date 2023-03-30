@@ -1,6 +1,6 @@
 use actix_web::{get, post, web::Json};
 
-use crate::handlers::source::create_source;
+use crate::{common, entity, handlers};
 
 use crate::{
     app::{
@@ -15,22 +15,20 @@ pub async fn create(
     state: AppState,
     body: Json<CreateEventSourceDto>,
     user_claims: UserClaims,
-) -> crate::common::Response<EventsSourceDto> {
-    let source = create_source(
-        user_claims.cid.clone(),
-        crate::entity::user::EventSource {
-            name: body.name.clone(),
-            url: body.url.clone(),
-        },
-        state,
-    )
-    .await?;
+) -> common::Response<EventsSourceDto> {
+    let source = entity::user::EventSource {
+        name: body.name.clone(),
+        url: body.url.clone(),
+    };
 
-    Ok(ApiResponse::from_data(source.into()))
+    let created_source =
+        handlers::source::create_source(user_claims.into_inner().cid, source, state).await?;
+
+    Ok(ApiResponse::from_data(created_source.into()))
 }
 
 #[get("/sync")]
 pub async fn sync(state: AppState, user_claims: UserClaims) -> crate::common::Response<()> {
-    crate::handlers::source::sync_sources(user_claims.cid.clone(), state).await?;
-    Ok(ApiResponse::from_data(()))
+    let result = handlers::source::sync_sources(user_claims.into_inner().cid, state).await?;
+    Ok(ApiResponse::from_data(result))
 }
