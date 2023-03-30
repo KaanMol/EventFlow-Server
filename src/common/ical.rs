@@ -1,4 +1,4 @@
-use icalendar::{Calendar, Component};
+use icalendar::Component;
 
 use crate::handlers::error::ResourceError;
 
@@ -12,10 +12,10 @@ pub async fn fetch_and_parse_ical_events(
         .get(&ical_uri.clone())
         .send()
         .await
-        .map_err(|e| ResourceError::NetworkError)?
+        .map_err(|_| ResourceError::NetworkError)?
         .text()
         .await
-        .map_err(|e| ResourceError::FailedParse("response body".to_string()))?;
+        .map_err(|_| ResourceError::FailedParse("response body".to_string()))?;
 
     let events = parse_ical(user_id, ical_body).await?;
 
@@ -28,7 +28,7 @@ async fn parse_ical(
 ) -> Result<Vec<crate::entity::event::EventEntity>, ResourceError> {
     let calendar = ical
         .parse::<icalendar::Calendar>()
-        .map_err(|e| ResourceError::FailedParse("calendar body".to_string()))?;
+        .map_err(|_| ResourceError::FailedParse("calendar body".to_string()))?;
 
     let mut result = Vec::new();
 
@@ -42,10 +42,7 @@ async fn parse_ical(
             "event title is empty".to_string(),
         ))?;
 
-        let description = match event.get_description() {
-            Some(description) => description,
-            None => "",
-        };
+        let description = event.get_description().unwrap_or("");
 
         let start = event
             .get_start()
@@ -70,8 +67,8 @@ async fn parse_ical(
             user_id: user_id.to_string(),
             title: title.to_string(),
             description: description.to_string(),
-            start: start,
-            end: end,
+            start,
+            end,
             all_day: start - end == chrono::Duration::min_value(),
             location: location.to_string(),
             event_uid: Some(id.to_string()),
@@ -89,16 +86,12 @@ trait ToUtc {
 
 impl ToUtc for icalendar::DatePerhapsTime {
     fn to_utc(self) -> Result<chrono::DateTime<chrono::Utc>, ResourceError> {
-        let mut timezone = chrono_tz::UTC;
+        // let mut timezone = chrono_tz::UTC;
 
         let date: chrono::NaiveDateTime = match self {
             // Converts a date to a datetime with a time of 00:00:00
             icalendar::DatePerhapsTime::Date(date) => {
-                let date = chrono::NaiveDateTime::new(
-                    date,
-                    chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
-                );
-                date
+                chrono::NaiveDateTime::new(date, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap())
             }
 
             // Converts a datetime to a datetime with the timezone set to UTC
@@ -107,13 +100,13 @@ impl ToUtc for icalendar::DatePerhapsTime {
                 icalendar::CalendarDateTime::Utc(date) => date.naive_utc(),
 
                 // If it has a timezone, parse it and convert it to UTC
-                icalendar::CalendarDateTime::WithTimezone { date_time, tzid } => {
-                    timezone = match tzid.parse() {
-                        Ok(tz) => tz,
-                        Err(e) => {
-                            return Err(ResourceError::FailedParse("ical timezone".to_string()))
-                        }
-                    };
+                icalendar::CalendarDateTime::WithTimezone { date_time, tzid: _ } => {
+                    // timezone = match tzid.parse() {
+                    //     Ok(tz) => tz,
+                    //     Err(_) => {
+                    //         return Err(ResourceError::FailedParse("ical timezone".to_string()))
+                    //     }
+                    // };
 
                     date_time
                 }
@@ -137,6 +130,6 @@ trait ToTimezone {
 impl ToTimezone for &String {
     fn to_timezone(&self) -> Result<chrono_tz::Tz, ResourceError> {
         self.parse()
-            .map_err(|e| ResourceError::FailedParse("ical timezone".to_string()))
+            .map_err(|_| ResourceError::FailedParse("ical timezone".to_string()))
     }
 }

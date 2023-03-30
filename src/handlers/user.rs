@@ -4,8 +4,7 @@ pub async fn get_user(
     auth_id: String,
     state: actix_web::web::Data<crate::app::State>,
 ) -> Result<crate::entity::user::User, super::error::ResourceError> {
-    // TODO: Cargo Clippy complains about ok_or_else() being used instead of ok_or(), this is not something with a high priority to fix, but handy to know.
-    let user = state
+    state
         .db
         .collection::<crate::entity::user::User>("users")
         .find_one(
@@ -16,9 +15,7 @@ pub async fn get_user(
         )
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?
-        .ok_or_else(|| ResourceError::NotFoundById(auth_id))?;
-
-    Ok(user)
+        .ok_or(ResourceError::NotFoundById(auth_id))
 }
 
 pub async fn create_user(

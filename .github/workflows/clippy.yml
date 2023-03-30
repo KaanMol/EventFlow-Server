@@ -1,0 +1,46 @@
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+name: Rust
+
+env:
+    RUSTFLAGS: "-Dwarnings"
+    DATABASE_URL: mongodb://root:example@localhost:27019
+
+jobs:
+    ci:
+        if: "! github.event.pull_request.draft"
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout codebase
+              uses: actions/checkout@v3
+
+            - name: Install Rust toolchain
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  components: clippy
+
+            - name: Apply cache
+              uses: Swatinem/rust-cache@v2
+
+            - name: Clippy
+              uses: giraffate/clippy-action@v1
+              with:
+                  reporter: "github-pr-review"
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Start database
+              uses: supercharge/mongodb-github-action@1.9.0
+              with:
+                  mongodb-version: "6.0"
+                  mongodb-port: 27019
+                  mongodb-username: root
+                  mongodb-password: example
+                  mongodb-database: calendarserver
+
+            - name: Tests
+              run: cargo test
