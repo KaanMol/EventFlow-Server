@@ -24,9 +24,3 @@ impl From<EventsSourceDto> for crate::entity::user::EventSource {
         }
     }
 }
-
-#[derive(Serialize, Deserialize, ToSchema)]
-pub struct CreateEventSourceDto {
-    pub name: String,
-    pub url: String,
-}
