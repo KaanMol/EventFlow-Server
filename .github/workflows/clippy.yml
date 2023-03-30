@@ -25,7 +25,7 @@ jobs:
             - name: Clippy
               run: cargo clippy --all-targets --all-features -- -D warnings
 
-            - name: Run database
+            - name: Start database
               uses: supercharge/mongodb-github-action@1.9.0
               with:
                   mongodb-version: "6.0"
