@@ -30,6 +30,9 @@ jobs:
               with:
                   mongodb-version: "6.0"
                   mongodb-port: 27019
+                  mongodb-username: root
+                  mongodb-password: example
+                  mongodb-database: calendarserver
 
             - name: test
               run: cargo test
