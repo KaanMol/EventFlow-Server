@@ -58,7 +58,7 @@ pub async fn add_source_with_invalid_name() {
     .err();
 
     let error = ResourceError::InvalidInput("name".to_string()).to_string();
-    assert_eq!(event_source.is_some(), true);
+    assert!(event_source.is_some());
     assert_eq!(event_source.unwrap().to_string(), error);
 }
 
@@ -88,6 +88,6 @@ pub async fn add_source_with_invalid_url() {
     .err();
 
     let error = ResourceError::InvalidInput("url".to_string()).to_string();
-    assert_eq!(event_source.is_some(), true);
+    assert!(event_source.is_some());
     assert_eq!(event_source.unwrap().to_string(), error);
 }

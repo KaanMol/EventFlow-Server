@@ -15,6 +15,7 @@ pub async fn connect() -> mongodb::Database {
     mongo_client().await.database("calendarserver")
 }
 
+#[allow(dead_code)] // This is not actually dead code, but clippy doesn't realise that tests are entry points.
 pub async fn connect_testdb() -> mongodb::Database {
     let client = mongo_client().await;
 
