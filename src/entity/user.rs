@@ -19,7 +19,7 @@ impl fmt::Display for User {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct EventSource {
     pub name: String,
     pub url: String,
