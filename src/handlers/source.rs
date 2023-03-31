@@ -19,13 +19,7 @@ pub async fn delete_source(
 ) -> Result<crate::entity::user::User, super::error::ResourceError> {
     let mut user = crate::handlers::user::get_user(auth_id.clone(), state.clone()).await?;
 
-    let mut sources = Vec::new();
-    for user_source in user.sources {
-        if user_source.url != source.url && user_source.name != source.name {
-            sources.push(user_source);
-        }
-    }
-    user.sources = sources;
+    user.sources.retain(|x| x != &source);
 
     crate::handlers::user::update_user(user, state.clone()).await
 }
