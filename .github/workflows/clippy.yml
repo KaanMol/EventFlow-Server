@@ -42,4 +42,4 @@ jobs:
                   mongodb-database: calendarserver
 
             - name: Tests
-              run: cargo test
+              run: cargo test -- --nocapture
