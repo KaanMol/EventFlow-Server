@@ -39,7 +39,6 @@ jobs:
                   mongodb-port: 27019
                   mongodb-username: root
                   mongodb-password: example
-                  mongodb-database: calendarserver
 
             - name: Tests
               run: cargo test
