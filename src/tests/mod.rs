@@ -8,9 +8,9 @@ use jsonwebtoken::TokenData;
 
 use crate::{app, common, entity};
 
-mod app;
 pub mod data;
 pub mod handlers;
+mod integration;
 
 pub async fn setup() -> app::State {
     dotenv::dotenv().ok();
