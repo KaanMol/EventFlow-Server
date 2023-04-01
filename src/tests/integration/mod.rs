@@ -1,14 +1,4 @@
-use crate::{
-    app::{routes::ping, AppState},
-    handlers::{self},
-};
-
-use actix_web::{
-    http::{self, header::ContentType},
-    test,
-    web::{self, Bytes},
-    App,
-};
+use actix_web::{test, web::Bytes, App};
 
 mod users;
 

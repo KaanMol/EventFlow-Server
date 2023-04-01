@@ -18,8 +18,8 @@ where
 
 // Struct that holds the data of an error in a response
 pub struct ResponseError {
-    code: StatusCode,
-    message: String,
+    pub code: StatusCode,
+    pub message: String,
 }
 
 // Implementation of the Serialize trait for the ResponseError struct
