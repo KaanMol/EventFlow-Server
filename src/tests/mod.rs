@@ -16,7 +16,10 @@ pub mod unit;
 async fn connect_testdb() -> mongodb::Database {
     let client = common::database::mongo_client().await;
 
-    client.database("testdb").drop(None).await.unwrap();
+    if std::env::var("DROP_DB_WHEN_TEST").is_ok() {
+        client.database("testdb").drop(None).await.unwrap();
+    }
+
     client.database("testdb")
 }
 
