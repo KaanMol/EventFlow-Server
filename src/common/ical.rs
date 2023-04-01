@@ -38,29 +38,27 @@ async fn parse_ical(
             None => continue,
         };
 
-        let title = event.get_summary().ok_or(ResourceError::FailedParse(
-            "event title is empty".to_string(),
-        ))?;
+        let title = event
+            .get_summary()
+            .ok_or_else(|| ResourceError::FailedParse("event title is empty".to_string()))?;
 
         let description = event.get_description().unwrap_or("");
 
         let start = event
             .get_start()
-            .ok_or(ResourceError::FailedParse(
-                "event start is empty".to_string(),
-            ))?
+            .ok_or_else(|| ResourceError::FailedParse("event start is empty".to_string()))?
             .to_utc()?;
 
         let end = event
             .get_end()
-            .ok_or(ResourceError::FailedParse("event end is empty".to_string()))?
+            .ok_or_else(|| ResourceError::FailedParse("event end is empty".to_string()))?
             .to_utc()?;
 
         let location = event.property_value("LOCATION").unwrap_or("");
 
         let id = event
             .get_uid()
-            .ok_or(ResourceError::FailedParse("event id is empty".to_string()))?;
+            .ok_or_else(|| ResourceError::FailedParse("event id is empty".to_string()))?;
 
         let event = crate::entity::event::EventEntity {
             id: None,
@@ -86,8 +84,6 @@ trait ToUtc {
 
 impl ToUtc for icalendar::DatePerhapsTime {
     fn to_utc(self) -> Result<chrono::DateTime<chrono::Utc>, ResourceError> {
-        // let mut timezone = chrono_tz::UTC;
-
         let date: chrono::NaiveDateTime = match self {
             // Converts a date to a datetime with a time of 00:00:00
             icalendar::DatePerhapsTime::Date(date) => {
@@ -100,16 +96,7 @@ impl ToUtc for icalendar::DatePerhapsTime {
                 icalendar::CalendarDateTime::Utc(date) => date.naive_utc(),
 
                 // If it has a timezone, parse it and convert it to UTC
-                icalendar::CalendarDateTime::WithTimezone { date_time, tzid: _ } => {
-                    // timezone = match tzid.parse() {
-                    //     Ok(tz) => tz,
-                    //     Err(_) => {
-                    //         return Err(ResourceError::FailedParse("ical timezone".to_string()))
-                    //     }
-                    // };
-
-                    date_time
-                }
+                icalendar::CalendarDateTime::WithTimezone { date_time, tzid: _ } => date_time,
 
                 // If the timezone is floating, just return the date
                 icalendar::CalendarDateTime::Floating(date) => date,
