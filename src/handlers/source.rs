@@ -5,7 +5,7 @@ pub async fn create_source(
     new_source: crate::entity::user::EventSource,
     state: actix_web::web::Data<crate::app::State>,
 ) -> Result<crate::entity::user::EventSource, super::error::ResourceError> {
-    if new_source.name.len() == 0 {
+    if new_source.name.is_empty() {
         return Err(ResourceError::InvalidInput("name".to_string()));
     }
 

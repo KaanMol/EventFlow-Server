@@ -5,7 +5,7 @@ use actix_web::{
 use actix_web_httpauth::middleware::HttpAuthentication;
 use utoipa::OpenApi;
 
-use self::{dto::EventsSourceDto, routes::create};
+use self::dto::EventsSourceDto;
 
 pub mod dto;
 pub mod routes;
