@@ -76,11 +76,7 @@ pub async fn get_all(
 
     let mut results: Vec<crate::entity::event::EventEntity> = Vec::new();
 
-    while let Ok(Some(event)) = cursor
-        .try_next()
-        .await
-        .or_else(|_| Err(ResourceError::Unknown))
-    {
+    while let Ok(Some(event)) = cursor.try_next().await.map_err(|_| ResourceError::Unknown) {
         results.push(event);
     }
 

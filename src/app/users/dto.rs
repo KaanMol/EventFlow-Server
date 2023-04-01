@@ -7,7 +7,7 @@ use crate::app::sources::dto::EventsSourceDto;
 pub struct UserDto {
     pub id: String,
     pub name: String,
-    pub identities: Vec<String>,
+    pub auth_id: String,
     pub sources: Vec<EventsSourceDto>,
 }
 
@@ -16,7 +16,7 @@ impl From<crate::entity::user::User> for UserDto {
         UserDto {
             id: user.id.unwrap().to_hex(),
             name: user.name,
-            identities: user.identities,
+            auth_id: user.auth_id,
             sources: user.sources.into_iter().map(|s| s.into()).collect(),
         }
     }

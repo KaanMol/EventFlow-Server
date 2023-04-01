@@ -1,4 +1,4 @@
-use icalendar::{Calendar, Component};
+use icalendar::Component;
 
 use crate::handlers::error::ResourceError;
 
@@ -12,10 +12,10 @@ pub async fn fetch_and_parse_ical_events(
         .get(&ical_uri.clone())
         .send()
         .await
-        .map_err(|e| ResourceError::NetworkError)?
+        .map_err(|_| ResourceError::NetworkError)?
         .text()
         .await
-        .map_err(|e| ResourceError::FailedParse("response body".to_string()))?;
+        .map_err(|_| ResourceError::FailedParse("response body".to_string()))?;
 
     let events = parse_ical(user_id, ical_body).await?;
 
@@ -28,7 +28,7 @@ async fn parse_ical(
 ) -> Result<Vec<crate::entity::event::EventEntity>, ResourceError> {
     let calendar = ical
         .parse::<icalendar::Calendar>()
-        .map_err(|e| ResourceError::FailedParse("calendar body".to_string()))?;
+        .map_err(|_| ResourceError::FailedParse("calendar body".to_string()))?;
 
     let mut result = Vec::new();
 
@@ -38,40 +38,35 @@ async fn parse_ical(
             None => continue,
         };
 
-        let title = event.get_summary().ok_or(ResourceError::FailedParse(
-            "event title is empty".to_string(),
-        ))?;
+        let title = event
+            .get_summary()
+            .ok_or_else(|| ResourceError::FailedParse("event title is empty".to_string()))?;
 
-        let description = match event.get_description() {
-            Some(description) => description,
-            None => "",
-        };
+        let description = event.get_description().unwrap_or("");
 
         let start = event
             .get_start()
-            .ok_or(ResourceError::FailedParse(
-                "event start is empty".to_string(),
-            ))?
+            .ok_or_else(|| ResourceError::FailedParse("event start is empty".to_string()))?
             .to_utc()?;
 
         let end = event
             .get_end()
-            .ok_or(ResourceError::FailedParse("event end is empty".to_string()))?
+            .ok_or_else(|| ResourceError::FailedParse("event end is empty".to_string()))?
             .to_utc()?;
 
         let location = event.property_value("LOCATION").unwrap_or("");
 
         let id = event
             .get_uid()
-            .ok_or(ResourceError::FailedParse("event id is empty".to_string()))?;
+            .ok_or_else(|| ResourceError::FailedParse("event id is empty".to_string()))?;
 
         let event = crate::entity::event::EventEntity {
             id: None,
             user_id: user_id.to_string(),
             title: title.to_string(),
             description: description.to_string(),
-            start: start,
-            end: end,
+            start,
+            end,
             all_day: start - end == chrono::Duration::min_value(),
             location: location.to_string(),
             event_uid: Some(id.to_string()),
@@ -94,11 +89,7 @@ impl ToUtc for icalendar::DatePerhapsTime {
         let date: chrono::NaiveDateTime = match self {
             // Converts a date to a datetime with a time of 00:00:00
             icalendar::DatePerhapsTime::Date(date) => {
-                let date = chrono::NaiveDateTime::new(
-                    date,
-                    chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
-                );
-                date
+                chrono::NaiveDateTime::new(date, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap())
             }
 
             // Converts a datetime to a datetime with the timezone set to UTC
@@ -110,7 +101,7 @@ impl ToUtc for icalendar::DatePerhapsTime {
                 icalendar::CalendarDateTime::WithTimezone { date_time, tzid } => {
                     timezone = match tzid.parse() {
                         Ok(tz) => tz,
-                        Err(e) => {
+                        Err(_) => {
                             return Err(ResourceError::FailedParse("ical timezone".to_string()))
                         }
                     };
@@ -137,6 +128,6 @@ trait ToTimezone {
 impl ToTimezone for &String {
     fn to_timezone(&self) -> Result<chrono_tz::Tz, ResourceError> {
         self.parse()
-            .map_err(|e| ResourceError::FailedParse("ical timezone".to_string()))
+            .map_err(|_e| ResourceError::FailedParse("ical timezone".to_string()))
     }
 }
