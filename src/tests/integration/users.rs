@@ -1,10 +1,11 @@
 use crate::{
     app::AppState,
+    common::Response,
     entity,
     handlers::{self},
     tests,
 };
-use actix_web::dev::Service;
+use actix_web::{dev::Service, http::header};
 
 use actix_web::{
     http::{self, header::ContentType},
@@ -27,10 +28,14 @@ async fn test_get_user_ok() {
         .await
         .unwrap();
 
-    let app = test::init_service(app.service(crate::app::users::routes::read)).await;
+    let app =
+        test::init_service(app.service(web::scope("/").service(crate::app::users::routes::read)))
+            .await;
 
     let req = test::TestRequest::get().uri("/").to_request();
-    let resp = test::call_and_read_body(&app, req).await;
+    let resp: Response<crate::app::users::dto::UserDto> =
+        test::call_and_read_body_json(&mut app, req).await;
+
     println!("resp: {:?}", resp);
     assert_eq!(resp, Bytes::from_static(b"pong"));
 }
