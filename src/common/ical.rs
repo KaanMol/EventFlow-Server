@@ -84,8 +84,6 @@ trait ToUtc {
 
 impl ToUtc for icalendar::DatePerhapsTime {
     fn to_utc(self) -> Result<chrono::DateTime<chrono::Utc>, ResourceError> {
-        let mut timezone = chrono_tz::UTC;
-
         let date: chrono::NaiveDateTime = match self {
             // Converts a date to a datetime with a time of 00:00:00
             icalendar::DatePerhapsTime::Date(date) => {
@@ -98,16 +96,7 @@ impl ToUtc for icalendar::DatePerhapsTime {
                 icalendar::CalendarDateTime::Utc(date) => date.naive_utc(),
 
                 // If it has a timezone, parse it and convert it to UTC
-                icalendar::CalendarDateTime::WithTimezone { date_time, tzid } => {
-                    timezone = match tzid.parse() {
-                        Ok(tz) => tz,
-                        Err(_) => {
-                            return Err(ResourceError::FailedParse("ical timezone".to_string()))
-                        }
-                    };
-
-                    date_time
-                }
+                icalendar::CalendarDateTime::WithTimezone { date_time, tzid: _ } => date_time,
 
                 // If the timezone is floating, just return the date
                 icalendar::CalendarDateTime::Floating(date) => date,
@@ -128,6 +117,6 @@ trait ToTimezone {
 impl ToTimezone for &String {
     fn to_timezone(&self) -> Result<chrono_tz::Tz, ResourceError> {
         self.parse()
-            .map_err(|_e| ResourceError::FailedParse("ical timezone".to_string()))
+            .map_err(|_| ResourceError::FailedParse("ical timezone".to_string()))
     }
 }
