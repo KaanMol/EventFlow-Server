@@ -2,10 +2,11 @@ use actix_web::{get, post, put, web::Json};
 
 use crate::{
     app::{
+        self,
         users::dto::{CreateUserDto, UserDto},
         AppState, UserClaims,
     },
-    common::Response,
+    common::{self, Response},
     entity,
     handlers::{self, error::ResourceError, response::ApiResponse},
 };
@@ -65,7 +66,7 @@ async fn update(
     state: AppState,
     body: Json<UpdateUserDto>,
     user_claims: UserClaims,
-) -> crate::common::Response<UserDto> {
+) -> common::Response<app::users::dto::UserDto> {
     let original_user =
         handlers::user::get_user(user_claims.cid.to_string(), state.clone()).await?;
 
