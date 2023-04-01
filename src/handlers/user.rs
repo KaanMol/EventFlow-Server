@@ -18,7 +18,7 @@ pub async fn get_user(
         )
         .await
         .map_err(|_| ResourceError::FailedDatabaseConnection)?
-        .ok_or_else(|| ResourceError::NotFoundById(user_identity))?;
+        .ok_or(ResourceError::NotFoundById(user_identity))?;
 
     Ok(user)
 }

@@ -114,7 +114,7 @@ impl<'de> Deserialize<'de> for ResponseError {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["code", "message"];
+        const FIELDS: &[&str] = &["code", "message"];
         deserializer.deserialize_struct("ResponseError", FIELDS, ResponseErrorVisitor)
     }
 }

@@ -1,27 +1,31 @@
-use crate::{
-    app::{self, Claims},
-    common,
-};
 use actix_web::{
     body::BoxBody,
     dev::{Service, ServiceFactory, ServiceRequest, ServiceResponse},
     App, HttpMessage,
 };
 
+use crate::{
+    app::{self, Claims},
+    common,
+};
+
 pub mod data;
-pub mod handlers;
 mod integration;
+pub mod unit;
+
+async fn connect_testdb() -> mongodb::Database {
+    let client = common::database::mongo_client().await;
+
+    client.database("testdb").drop(None).await.unwrap();
+    client.database("testdb")
+}
 
 pub async fn setup() -> app::State {
     dotenv::dotenv().ok();
 
     app::State {
-        db: common::database::connect_testdb().await,
+        db: connect_testdb().await,
     }
-}
-
-pub struct TestClaims {
-    pub cid: String,
 }
 
 pub fn get_integration_app(
