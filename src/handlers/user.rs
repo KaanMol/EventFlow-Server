@@ -42,14 +42,14 @@ pub async fn update_user(
 
     // Find all the sources that are new
     for source in user.sources.clone() {
-        if updated_user.sources.contains(&source) == false {
+        if !updated_user.sources.contains(&source) {
             added_sources.push(source);
         }
     }
 
     // Remove all the sources that are no longer in the user's list
     for source in updated_user.sources.clone() {
-        if user.sources.contains(&source) == false {
+        if !user.sources.contains(&source) {
             updated_user.sources.retain(|x| x != &source);
         }
     }
@@ -57,16 +57,14 @@ pub async fn update_user(
     // Check if the new sources are valid, if they are, add them to the user's list
     // TODO: These error messages should be more descriptive and describe *which* source is invalid.
     for new_source in added_sources {
-        if new_source.name.len() == 0 {
-            // return Err(ResourceError::InvalidInput("name".to_string()));
-            continue;
+        if new_source.name.is_empty() {
+            return Err(ResourceError::InvalidInput("name".to_string()));
         }
 
         let regex_source = r"^(https?|webcals)://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)";
         let url_regex = regex::Regex::new(regex_source).unwrap();
         if !url_regex.is_match(&new_source.url) {
-            // return Err(ResourceError::InvalidInput("url".to_string()));
-            continue;
+            return Err(ResourceError::InvalidInput("url".to_string()));
         }
 
         updated_user.sources.push(new_source);

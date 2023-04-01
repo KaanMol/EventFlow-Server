@@ -50,15 +50,14 @@ pub async fn add_source_with_invalid_name() {
         url: "https://example.com".to_string(),
     };
 
-    let updated_user = handlers::source::create_source(
+    let result = handlers::source::create_source(
         auth_id.clone(),
         new_source,
         actix_web::web::Data::new(state.clone()),
     )
-    .await
-    .unwrap();
+    .await;
 
-    assert_eq!(updated_user.sources.len(), 0);
+    assert!(result.is_err());
 }
 
 #[actix_rt::test]
@@ -78,15 +77,14 @@ pub async fn add_source_with_invalid_url() {
         url: "ftp://example.com".to_string(),
     };
 
-    let updated_user = handlers::source::create_source(
+    let result = handlers::source::create_source(
         auth_id.clone(),
         new_source,
         actix_web::web::Data::new(state.clone()),
     )
-    .await
-    .unwrap();
+    .await;
 
-    assert_eq!(updated_user.sources.len(), 0);
+    assert!(result.is_err());
 }
 
 #[actix_rt::test]

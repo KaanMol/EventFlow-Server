@@ -1,9 +1,8 @@
-use crate::{app::sources::dto::CreateEventSourceDto, handlers, tests};
-use actix_web::{
-    test,
-    web::{self, Bytes},
-    App,
+use crate::{
+    app::{self, sources::dto::EventsSourceDto},
+    entity, handlers, tests,
 };
+use actix_web::{test, web};
 
 #[actix_web::test]
 async fn test_add_source() {
@@ -16,22 +15,31 @@ async fn test_add_source() {
     )
     .await;
 
+    state
+        .db
+        .collection::<entity::user::User>("users")
+        .insert_one(tests::data::users(&auth_id).get(0).unwrap(), None)
+        .await
+        .unwrap();
+
     let request = test::TestRequest::post()
         .uri("/")
-        .set_json(CreateEventSourceDto {
+        .set_json(EventsSourceDto {
             name: "test".to_string(),
             url: "http://test.com".to_string(),
         })
         .to_request();
-    let response: handlers::response::ApiResponse<crate::app::sources::dto::EventsSourceDto> =
+    let response: handlers::response::ApiResponse<app::users::dto::UserDto> =
         test::call_and_read_body_json(&service, request).await;
 
     assert!(response.error.is_none());
     assert!(response.data.is_some());
 
-    let data = response.data.unwrap();
-    assert_eq!(data.name, "test");
-    assert_eq!(data.url, "http://test.com");
+    let body = response.data.unwrap();
+    let source = body.sources.get(0).unwrap();
+
+    assert_eq!(source.name, "test");
+    assert_eq!(source.url, "http://test.com");
 }
 
 #[actix_web::test]
@@ -45,14 +53,21 @@ async fn test_add_source_with_invalid_url() {
     )
     .await;
 
+    state
+        .db
+        .collection::<entity::user::User>("users")
+        .insert_one(tests::data::users(&auth_id).get(0).unwrap(), None)
+        .await
+        .unwrap();
+
     let request = test::TestRequest::post()
         .uri("/")
-        .set_json(CreateEventSourceDto {
+        .set_json(EventsSourceDto {
             name: "test".to_string(),
             url: "123".to_string(),
         })
         .to_request();
-    let response: handlers::response::ApiResponse<crate::app::sources::dto::EventsSourceDto> =
+    let response: handlers::response::ApiResponse<crate::app::users::dto::UserDto> =
         test::call_and_read_body_json(&service, request).await;
 
     assert!(response.error.is_some());
@@ -71,14 +86,21 @@ async fn test_add_source_with_invalid_name() {
     )
     .await;
 
+    state
+        .db
+        .collection::<entity::user::User>("users")
+        .insert_one(tests::data::users(&auth_id).get(0).unwrap(), None)
+        .await
+        .unwrap();
+
     let request = test::TestRequest::post()
         .uri("/")
-        .set_json(CreateEventSourceDto {
+        .set_json(EventsSourceDto {
             name: "".to_string(),
             url: "http://test.com".to_string(),
         })
         .to_request();
-    let response: handlers::response::ApiResponse<crate::app::sources::dto::EventsSourceDto> =
+    let response: handlers::response::ApiResponse<crate::app::users::dto::UserDto> =
         test::call_and_read_body_json(&service, request).await;
 
     assert!(response.error.is_some());
