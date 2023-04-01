@@ -83,6 +83,32 @@ pub async fn get_all(
     Ok(results)
 }
 
+pub async fn update(
+    event: crate::entity::event::EventEntity,
+    state: actix_web::web::Data<crate::app::State>,
+) -> Result<crate::entity::event::EventEntity, super::error::ResourceError> {
+    let id = match event.id {
+        Some(id) => id,
+        None => return Err(ResourceError::InvalidInput("id".to_string())),
+    };
+
+    let updated_event = state
+        .db
+        .collection::<crate::entity::event::EventEntity>("events")
+        .find_one_and_replace(
+            mongodb::bson::doc! {
+                "_id": id
+            },
+            event,
+            None,
+        )
+        .await
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?
+        .ok_or_else(|| ResourceError::NotFoundById(id.to_string()))?;
+
+    Ok(updated_event)
+}
+
 pub async fn delete(
     event_id: mongodb::bson::oid::ObjectId,
     state: actix_web::web::Data<crate::app::State>,
