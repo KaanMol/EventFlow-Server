@@ -33,9 +33,9 @@ async fn test_get_user_ok() {
             .await;
 
     let req = test::TestRequest::get().uri("/").to_request();
-    let resp: Response<crate::app::users::dto::UserDto> =
-        test::call_and_read_body_json(&mut app, req).await;
+    let resp: handlers::response::ApiResponse<crate::app::users::dto::UserDto> =
+        test::call_and_read_body_json(&app, req).await;
 
-    println!("resp: {:?}", resp);
-    assert_eq!(resp, Bytes::from_static(b"pong"));
+    let body = resp.data.unwrap();
+    assert_eq!(body.auth_id, auth_id);
 }
