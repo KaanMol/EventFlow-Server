@@ -42,6 +42,7 @@ pub fn routes() -> actix_web::Scope<
 
     actix_web::web::scope("/sources")
         .wrap(auth)
-        .service(routes::create)
         .service(routes::sync)
+        .service(routes::create)
+        .service(routes::delete)
 }

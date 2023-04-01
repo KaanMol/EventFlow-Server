@@ -8,7 +8,7 @@ on:
 name: Rust
 
 env:
-    DATABASE_URL: mongodb://root:example@localhost:27019
+    DATABASE_URL: mongodb://root:example@localhost:27017
 
 jobs:
     ci:
@@ -25,6 +25,8 @@ jobs:
 
             - name: Apply cache
               uses: Swatinem/rust-cache@v2
+              with:
+                  cache-on-failure: "true"
 
             - name: Clippy
               uses: giraffate/clippy-action@v1
@@ -36,9 +38,9 @@ jobs:
               uses: supercharge/mongodb-github-action@1.9.0
               with:
                   mongodb-version: "6.0"
-                  mongodb-port: 27019
+                  mongodb-port: 27017
                   mongodb-username: root
                   mongodb-password: example
 
             - name: Tests
-              run: cargo test
+              run: cargo test -- --nocapture

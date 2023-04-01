@@ -1,8 +1,9 @@
-use actix_web::{get, post, web::Json};
+use actix_web::{delete, get, post, web::Json};
+use bson::oid::ObjectId;
 
 use crate::{
     app::{
-        events::dto::{CreateEventDto, EventDto},
+        events::dto::{CreateEventDto, DeleteEventDto, EventDto},
         AppState, UserClaims,
     },
     common::Response,
@@ -71,4 +72,25 @@ pub async fn read_all(state: AppState, user_claims: UserClaims) -> Response<Vec<
 
     // Return the response
     Ok(ApiResponse::from_data(events))
+}
+
+#[delete("")]
+pub async fn delete(
+    body: Json<DeleteEventDto>,
+    state: AppState,
+    user_claims: UserClaims,
+) -> Response<()> {
+    let id =
+        ObjectId::parse_str(&body.id).map_err(|_| ResourceError::FailedParse("id".to_string()))?;
+
+    let event = crate::handlers::events::get_one(id, state.clone()).await?;
+
+    if event.user_id != user_claims.into_inner().cid {
+        return Err(ResourceError::Unknown); // TODO: Return an unauthorized error
+    }
+
+    crate::handlers::events::delete(id, state.clone()).await?;
+
+    // Return the response
+    Ok(ApiResponse::from_data(()))
 }

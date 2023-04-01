@@ -1,49 +1,34 @@
-use super::error::ResourceError;
+use crate::entity::user::EventSource;
 
 pub async fn create_source(
-    user_identity: String,
-    new_source: crate::entity::user::EventSource,
+    auth_id: String,
+    source: crate::entity::user::EventSource,
     state: actix_web::web::Data<crate::app::State>,
-) -> Result<crate::entity::user::EventSource, super::error::ResourceError> {
-    if new_source.name.is_empty() {
-        return Err(ResourceError::InvalidInput("name".to_string()));
-    }
+) -> Result<crate::entity::user::User, super::error::ResourceError> {
+    let mut user = crate::handlers::user::get_user(auth_id.clone(), state.clone()).await?;
 
-    let regex_source = r"^(https?|webcals)://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)";
-    let url_regex = regex::Regex::new(regex_source).unwrap();
-    if !url_regex.is_match(&new_source.url) {
-        return Err(ResourceError::InvalidInput("url".to_string()));
-    }
+    user.sources.push(source.clone());
 
-    let filter = mongodb::bson::doc! {
-        "auth_id": user_identity
-    };
+    crate::handlers::user::update_user(user, state.clone()).await
+}
 
-    let update = mongodb::bson::doc! {
-        "$push": {
-            "sources": super::to_bson(&new_source)
-        }
-    };
+pub async fn delete_source(
+    auth_id: String,
+    source: EventSource,
+    state: actix_web::web::Data<crate::app::State>,
+) -> Result<crate::entity::user::User, super::error::ResourceError> {
+    let mut user = crate::handlers::user::get_user(auth_id.clone(), state.clone()).await?;
 
-    state
-        .db
-        .collection::<crate::entity::user::User>("users")
-        .update_one(filter, update, None)
-        .await
-        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
+    user.sources.retain(|x| x != &source);
 
-    // TODO: Add check that the source has actually modified the user, if not, return an error.
-
-    Ok(new_source)
+    crate::handlers::user::update_user(user, state.clone()).await
 }
 
 pub async fn sync_sources(
     user_id: String,
     state: actix_web::web::Data<crate::app::State>,
 ) -> Result<(), super::error::ResourceError> {
-    let user = crate::handlers::user::get_user(user_id.clone(), state.clone())
-        .await
-        .map_err(|_| ResourceError::NotFoundById(user_id.clone()))?;
+    let user = crate::handlers::user::get_user(user_id.clone(), state.clone()).await?;
 
     for source in user.sources {
         let events =

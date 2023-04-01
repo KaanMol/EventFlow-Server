@@ -16,12 +16,17 @@ pub mod unit;
 async fn connect_testdb() -> mongodb::Database {
     let client = common::database::mongo_client().await;
 
-    client.database("testdb").drop(None).await.unwrap();
+    if std::env::var("DROP_DB_WHEN_TEST").is_ok() {
+        client.database("testdb").drop(None).await.unwrap();
+    }
+
     client.database("testdb")
 }
 
 pub async fn setup() -> app::State {
     dotenv::dotenv().ok();
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::try_init().ok();
 
     app::State {
         db: connect_testdb().await,

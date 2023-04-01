@@ -35,3 +35,8 @@ pub struct CreateEventDto {
     pub all_day: bool,
     pub location: String,
 }
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct DeleteEventDto {
+    pub id: String,
+}

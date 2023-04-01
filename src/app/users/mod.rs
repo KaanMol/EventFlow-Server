@@ -8,6 +8,8 @@ use dto::{CreateUserDto, UserDto};
 use utoipa::OpenApi;
 use crate::common::SecurityAddon;
 
+use self::routes::update;
+
 #[derive(OpenApi)]
 #[openapi(
         paths(
@@ -35,4 +37,5 @@ pub fn routes() -> actix_web::Scope<impl ServiceFactory<ServiceRequest, Config =
 		.wrap(auth)
 		.service(read)
 		.service(create)
+		.service(update)
 }

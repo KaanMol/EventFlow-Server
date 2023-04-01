@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Clone, Serialize, Deserialize, ToSchema)]
 pub struct EventsSourceDto {
     pub name: String,
     pub url: String,
@@ -16,8 +16,11 @@ impl From<crate::entity::user::EventSource> for EventsSourceDto {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
-pub struct CreateEventSourceDto {
-    pub name: String,
-    pub url: String,
+impl From<EventsSourceDto> for crate::entity::user::EventSource {
+    fn from(event_source: EventsSourceDto) -> Self {
+        crate::entity::user::EventSource {
+            name: event_source.name,
+            url: event_source.url,
+        }
+    }
 }

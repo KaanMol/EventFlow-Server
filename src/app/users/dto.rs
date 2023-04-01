@@ -26,3 +26,9 @@ impl From<crate::entity::user::User> for UserDto {
 pub struct CreateUserDto {
     pub name: String,
 }
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct UpdateUserDto {
+    pub name: Option<String>,
+    pub sources: Option<Vec<EventsSourceDto>>,
+}
