@@ -1,4 +1,4 @@
-mod dto;
+pub mod dto;
 pub mod routes;
 
 use crate::app::users::routes::{ __path_create, create, __path_read, read };

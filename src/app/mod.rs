@@ -18,16 +18,16 @@ pub type AppState = actix_web::web::Data<State>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Claims {
-    name: String,
-    cid: String,
-    nickname: String,
-    preferred_username: String,
-    given_name: String,
-    auth_time: i64,
-    iat: i64,
-    exp: i64,
-    sub: String,
-    groups: Vec<String>,
+    pub name: String,
+    pub cid: String,
+    pub nickname: String,
+    pub preferred_username: String,
+    pub given_name: String,
+    pub auth_time: i64,
+    pub iat: i64,
+    pub exp: i64,
+    pub sub: String,
+    pub groups: Vec<String>,
 }
 
 pub type UserClaims = actix_web::web::ReqData<Claims>;
