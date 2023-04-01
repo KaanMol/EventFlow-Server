@@ -1,14 +1,11 @@
-use actix_web::{
-    body::{BoxBody, EitherBody},
-    dev::{Service, ServiceFactory, ServiceRequest, ServiceResponse},
-    http::Error,
-    App, HttpMessage,
-};
-use jsonwebtoken::TokenData;
-
 use crate::{
-    app::{self, Claims, UserClaims},
-    common, entity,
+    app::{self, Claims},
+    common,
+};
+use actix_web::{
+    body::BoxBody,
+    dev::{Service, ServiceFactory, ServiceRequest, ServiceResponse},
+    App, HttpMessage,
 };
 
 pub mod data;
