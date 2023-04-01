@@ -3,11 +3,11 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod api;
-mod events;
+pub mod events;
 mod middleware;
-mod routes;
-mod sources;
-mod users;
+pub mod routes;
+pub mod sources;
+pub mod users;
 
 #[derive(Clone)]
 pub struct State {
