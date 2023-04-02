@@ -1,5 +1,6 @@
 use actix_web::{test, web::Bytes, App};
 
+mod events;
 mod sources;
 mod users;
 
