@@ -3,7 +3,7 @@ use crate::{entity, handlers, tests};
 #[actix_rt::test]
 pub async fn when_add_source_ok_expect_source_added_to_user() {
     let state = tests::setup().await;
-    let auth_id = "when_add_source_ok_expect_added_source".to_string();
+    let auth_id = "when_add_source_ok_expect_source_added_to_user".to_string();
 
     state
         .db
