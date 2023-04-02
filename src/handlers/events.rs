@@ -92,21 +92,18 @@ pub async fn update(
         None => return Err(ResourceError::InvalidInput("id".to_string())),
     };
 
-    let updated_event = state
+    let filter = mongodb::bson::doc! {
+        "_id": id
+    };
+
+    state
         .db
         .collection::<crate::entity::event::EventEntity>("events")
-        .find_one_and_replace(
-            mongodb::bson::doc! {
-                "_id": id
-            },
-            event,
-            None,
-        )
+        .replace_one(filter, event, None)
         .await
-        .map_err(|_| ResourceError::FailedDatabaseConnection)?
-        .ok_or_else(|| ResourceError::NotFoundById(id.to_string()))?;
+        .map_err(|_| ResourceError::FailedDatabaseConnection)?;
 
-    Ok(updated_event)
+    get_one(id, state).await
 }
 
 pub async fn delete(
