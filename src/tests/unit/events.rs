@@ -79,3 +79,47 @@ pub async fn test_get_event_empty() {
         _ => assert!(false),
     }
 }
+
+#[actix_rt::test]
+pub async fn update_event() {
+    let state = tests::setup().await;
+    let auth_id = "update_event".to_string();
+
+    state
+        .db
+        .collection::<entity::user::User>("users")
+        .insert_one(tests::data::users(&auth_id).get(0).unwrap(), None)
+        .await
+        .unwrap();
+
+    let event_id = state
+        .db
+        .collection::<entity::event::EventEntity>("events")
+        .insert_one(tests::data::events(&auth_id).get(0).unwrap(), None)
+        .await
+        .unwrap()
+        .inserted_id
+        .as_object_id()
+        .unwrap();
+
+    let event = crate::handlers::events::update(
+        entity::event::EventEntity {
+            id: Some(event_id.clone()),
+            title: "Updated Event".to_string(),
+            description: "Updated Description".to_string(),
+            location: "Updated Location".to_string(),
+            start: chrono::Utc::now(),
+            end: chrono::Utc::now(),
+            user_id: auth_id.clone(),
+            all_day: false,
+            event_uid: None,
+        },
+        actix_web::web::Data::new(state.clone()),
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(event.title, "Updated Event");
+    assert_eq!(event.description, "Updated Description");
+    assert_eq!(event.location, "Updated Location");
+}
