@@ -1,8 +1,4 @@
-use crate::{
-    entity,
-    handlers::{self},
-    tests,
-};
+use crate::{entity, handlers, tests};
 
 #[actix_rt::test]
 pub async fn get_user() {

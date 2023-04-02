@@ -1,8 +1,4 @@
-use crate::{
-    entity,
-    handlers::{self, error::ResourceError},
-    tests,
-};
+use crate::{entity, handlers, tests};
 
 #[actix_rt::test]
 pub async fn add_source() {
