@@ -5,8 +5,8 @@ use crate::{
 use actix_web::{test, web};
 
 #[actix_web::test]
-async fn test_add_source() {
-    let auth_id = "test_add_source".to_string();
+async fn when_add_source_ok_expect_user_with_new_source() {
+    let auth_id = "when_add_source_ok_expect_user_with_new_source".to_string();
     let state = tests::setup().await;
     let app = tests::get_integration_app(state.clone(), auth_id.clone());
 
@@ -43,8 +43,8 @@ async fn test_add_source() {
 }
 
 #[actix_web::test]
-async fn test_add_source_with_invalid_url() {
-    let auth_id = "test_add_source_with_invalid_url".to_string();
+async fn when_add_source_with_invalid_url_expect_error() {
+    let auth_id = "when_add_source_with_invalid_url_expect_error".to_string();
     let state = tests::setup().await;
     let app = tests::get_integration_app(state.clone(), auth_id.clone());
 
@@ -76,8 +76,8 @@ async fn test_add_source_with_invalid_url() {
 }
 
 #[actix_web::test]
-async fn test_add_source_with_invalid_name() {
-    let auth_id = "test_add_source_with_invalid_url".to_string();
+async fn when_add_source_with_invalid_name_expect_error() {
+    let auth_id = "when_add_source_with_invalid_name_expect_error".to_string();
     let state = tests::setup().await;
     let app = tests::get_integration_app(state.clone(), auth_id.clone());
 

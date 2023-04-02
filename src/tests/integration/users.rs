@@ -2,8 +2,8 @@ use crate::{entity, handlers, tests};
 use actix_web::{test, web};
 
 #[actix_web::test]
-async fn test_get_user_ok() {
-    let auth_id = "test_get_user_ok".to_string();
+async fn when_get_user_ok_expect_user() {
+    let auth_id = "when_get_user_ok_expect_user".to_string();
     let state = tests::setup().await;
     let app = tests::get_integration_app(state.clone(), auth_id.clone());
 
@@ -28,8 +28,8 @@ async fn test_get_user_ok() {
 }
 
 #[actix_web::test]
-async fn test_get_not_existing_user() {
-    let auth_id = "test_get_not_existing_user".to_string();
+async fn when_get_not_existing_user_ok_expect_not_found() {
+    let auth_id = "when_get_not_existing_user_ok_expect_not_found".to_string();
     let state = tests::setup().await;
     let app = tests::get_integration_app(state.clone(), auth_id.clone());
 

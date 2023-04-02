@@ -5,9 +5,9 @@ use bson::oid::ObjectId;
 use crate::{entity, handlers::error::ResourceError, tests};
 
 #[actix_rt::test]
-pub async fn test_get_events_ok() {
+pub async fn when_get_events_ok_expect_events() {
     let state = tests::setup().await;
-    let user_id: String = "test_get_events_ok".to_string();
+    let user_id: String = "when_get_events_ok_expect_events".to_string();
 
     state
         .db
@@ -26,7 +26,7 @@ pub async fn test_get_events_ok() {
 }
 
 #[actix_rt::test]
-pub async fn test_get_events_empty() {
+pub async fn when_get_events_empty_expect_empty_list() {
     let state = tests::setup().await;
     let user_id: String = "test_get_events_empty".to_string();
 
@@ -39,9 +39,9 @@ pub async fn test_get_events_empty() {
 }
 
 #[actix_rt::test]
-pub async fn test_get_event_ok() {
+pub async fn when_get_event_ok_expect_event() {
     let state = tests::setup().await;
-    let user_id: String = "test_get_event_ok".to_string();
+    let user_id: String = "when_get_event_ok_expect_event".to_string();
 
     let event_id = state
         .db
@@ -61,7 +61,7 @@ pub async fn test_get_event_ok() {
 }
 
 #[actix_rt::test]
-pub async fn test_get_event_empty() {
+pub async fn when_get_not_existing_event_expect_error() {
     let state = tests::setup().await;
     let not_existing_event_id = ObjectId::from_str("5f1f3c7d7c3c4b0b8c8b4567").unwrap();
 
@@ -81,9 +81,9 @@ pub async fn test_get_event_empty() {
 }
 
 #[actix_rt::test]
-pub async fn update_event() {
+pub async fn when_update_event_ok_expect_success() {
     let state = tests::setup().await;
-    let auth_id = "update_event".to_string();
+    let auth_id = "when_update_event_ok_expect_success".to_string();
 
     state
         .db

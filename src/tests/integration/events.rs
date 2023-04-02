@@ -2,8 +2,8 @@ use crate::{app::events::dto::UpdateEventDto, entity, handlers, tests};
 use actix_web::{test, web};
 
 #[actix_web::test]
-async fn test_update_non_existing_event() {
-    let auth_id = "test_update_non_existing_event".to_string();
+async fn when_update_not_existing_event_expect_error() {
+    let auth_id = "when_update_not_existing_event_expect_error".to_string();
     let state = tests::setup().await;
     let app = tests::get_integration_app(state.clone(), auth_id.clone());
 
@@ -34,8 +34,8 @@ async fn test_update_non_existing_event() {
 }
 
 #[actix_web::test]
-async fn test_update_event() {
-    let auth_id = "test_update_event".to_string();
+async fn when_update_event_ok_expect_success() {
+    let auth_id = "when_update_event_ok_expect_success".to_string();
     let state = tests::setup().await;
     let app = tests::get_integration_app(state.clone(), auth_id.clone());
 

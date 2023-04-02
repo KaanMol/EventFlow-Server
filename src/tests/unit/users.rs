@@ -1,9 +1,9 @@
 use crate::{entity, handlers, tests};
 
 #[actix_rt::test]
-pub async fn get_user() {
+pub async fn when_get_user_ok_expect_user() {
     let state = tests::setup().await;
-    let auth_id = "get_user".to_string();
+    let auth_id = "when_get_user_ok_expect_user".to_string();
 
     state
         .db
