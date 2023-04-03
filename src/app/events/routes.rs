@@ -1,4 +1,4 @@
-use actix_web::{delete, get, post, web::Json};
+use actix_web::{delete, get, post, put, web::Json};
 use bson::oid::ObjectId;
 
 use crate::{
@@ -9,6 +9,8 @@ use crate::{
     common::Response,
     handlers::{error::ResourceError, response::ApiResponse},
 };
+
+use super::dto::UpdateEventDto;
 
 #[utoipa::path(
 	context_path = "/events",
@@ -93,4 +95,77 @@ pub async fn delete(
 
     // Return the response
     Ok(ApiResponse::from_data(()))
+}
+
+#[put("")]
+pub async fn update(
+    body: Json<UpdateEventDto>,
+    state: AppState,
+    user_claims: UserClaims,
+) -> Response<EventDto> {
+    let id =
+        ObjectId::parse_str(&body.id).map_err(|_| ResourceError::FailedParse("id".to_string()))?;
+
+    let original_event = crate::handlers::events::get_one(id, state.clone()).await?;
+
+    if original_event.user_id != user_claims.into_inner().cid {
+        return Err(ResourceError::Unknown); // TODO: Return an unauthorized error
+    }
+
+    let title = match &body.title {
+        Some(title) => title.clone(),
+        None => original_event.title,
+    };
+
+    let description = match &body.description {
+        Some(description) => description.clone(),
+        None => original_event.description,
+    };
+
+    let start_date = match &body.start {
+        Some(start) => {
+            // FIXME: Should time convertion from a user given string be done in a dedicated function?
+            let start_date = chrono::DateTime::parse_from_rfc2822(&start)
+                .map_err(|_| ResourceError::FailedParse("start date".to_string()))?;
+            start_date.with_timezone(&chrono::Utc)
+        }
+        None => original_event.start,
+    };
+
+    let end_date = match &body.end {
+        Some(end) => {
+            let end_date = chrono::DateTime::parse_from_rfc2822(&end)
+                .map_err(|_| ResourceError::FailedParse("end date".to_string()))?;
+            end_date.with_timezone(&chrono::Utc)
+        }
+        None => original_event.end,
+    };
+
+    let all_day = match &body.all_day {
+        Some(all_day) => *all_day,
+        None => original_event.all_day,
+    };
+
+    let location = match &body.location {
+        Some(location) => location.clone(),
+        None => original_event.location,
+    };
+
+    let updated_event = crate::handlers::events::update(
+        crate::entity::event::EventEntity {
+            id: Some(id),
+            title,
+            description,
+            start: start_date,
+            end: end_date,
+            all_day,
+            location,
+            user_id: original_event.user_id,
+            event_uid: original_event.event_uid,
+        },
+        state,
+    )
+    .await?;
+
+    Ok(ApiResponse::from_data(updated_event.into()))
 }

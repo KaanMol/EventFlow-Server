@@ -1,13 +1,9 @@
-use crate::{
-    entity,
-    handlers::{self, error::ResourceError},
-    tests,
-};
+use crate::{entity, handlers, tests};
 
 #[actix_rt::test]
-pub async fn add_source() {
+pub async fn when_add_source_ok_expect_source_added_to_user() {
     let state = tests::setup().await;
-    let auth_id = "add_source".to_string();
+    let auth_id = "when_add_source_ok_expect_source_added_to_user".to_string();
 
     state
         .db
@@ -34,9 +30,9 @@ pub async fn add_source() {
 }
 
 #[actix_rt::test]
-pub async fn add_source_with_invalid_name() {
+pub async fn when_add_source_with_invalid_name_expect_error() {
     let state = tests::setup().await;
-    let auth_id = "add_source_with_invalid_name".to_string();
+    let auth_id = "when_add_source_with_invalid_name_expect_error".to_string();
 
     state
         .db
@@ -61,9 +57,9 @@ pub async fn add_source_with_invalid_name() {
 }
 
 #[actix_rt::test]
-pub async fn add_source_with_invalid_url() {
+pub async fn when_add_source_with_invalid_url_expect_error() {
     let state = tests::setup().await;
-    let auth_id = "add_source_with_invalid_url".to_string();
+    let auth_id = "when_add_source_with_invalid_url_expect_error".to_string();
 
     state
         .db
@@ -88,9 +84,9 @@ pub async fn add_source_with_invalid_url() {
 }
 
 #[actix_rt::test]
-pub async fn delete_source() {
+pub async fn when_delete_source_ok_expect_success() {
     let state = tests::setup().await;
-    let auth_id = "delete_source".to_string();
+    let auth_id = "when_delete_source_ok_expect_success".to_string();
 
     state
         .db

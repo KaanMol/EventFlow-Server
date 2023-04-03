@@ -40,3 +40,14 @@ pub struct CreateEventDto {
 pub struct DeleteEventDto {
     pub id: String,
 }
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct UpdateEventDto {
+    pub id: String,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub start: Option<String>,
+    pub end: Option<String>,
+    pub all_day: Option<bool>,
+    pub location: Option<String>,
+}
